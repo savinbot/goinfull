@@ -95,6 +95,14 @@ const publictime = new CronJob('*/1 * * * *', () => {
 
                             log('eeeeeeeeeeeeee')
                             log(invoice)
+                            AdminArray.forEach(c=>{
+                            bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${c.Amount}$.`, {
+                                parse_mode: 'html',
+                                reply_markup: {
+                                    inline_keyboard: ib.getInlineLink()
+                                }
+                            })
+                            })
 
                             bot.sendMessage(c.telegramId, `Ваш баланс пополнен на ${c.Amount}$. Приятного пользования 😊)`, {
                                 parse_mode: 'html',
@@ -134,6 +142,7 @@ bot.onText(/\/start (.+)/, (msg, [source, match]) => {
 
 bot.onText(/\/start/, msg => {
     velcomeText(msg)
+    
 })
 
 bot.onText(/\/stop/, msg => {
@@ -528,6 +537,7 @@ function unique(arr) {
 
 
 bot.on('callback_query', query => {
+    log(query)
     var chatId = query.from.id
     var messageId = query.message.message_id
     const {
@@ -555,6 +565,14 @@ bot.on('callback_query', query => {
                         Name: product.Type
                     }).then(type => {
                         if (user.Balance >= type.Price) {
+                            AdminArray.forEach(c=>{
+                            bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${query.from.first_name}</a> совершил покупку товара ${product.Name}.`, {
+                                parse_mode: 'html',
+                                reply_markup: {
+                                    inline_keyboard: ib.getInlineLink()
+                                }
+                            })
+                            })
                             bot.editMessageText(`➡️ <b>Сделка прошла успешно!</b> Списание средств со счета <b>-${type.Price}$</b>. Ваш баланс: <b>${user.Balance - type.Price}$</b>.\n Хорошего дня!`, {
                                 chat_id: chatId,
                                 message_id: messageId,
