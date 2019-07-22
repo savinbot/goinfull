@@ -1,0 +1,35 @@
+    if (type.slice(0, 3) ===`nav`) {
+        var i = type.slice(3, 4)
+        var de = parseInt(i) 
+        if (ttype === 'n') {
+        var e = de+1
+            fooedit(query.from.id,query.message.message_id,categoria,query,n,false,false,ne,' ',e)
+        }
+        if (ttype === 'p') {
+        var e = de-1
+            fooedit(query.from.id,query.message.message_id,categoria,query,n,false,false,ne,' ',e)
+        }
+    }
+
+
+
+
+
+
+
+
+                                                arr.unshift([
+                                                                    {
+                                                                        text:'<<',
+                                                                        callback_data: JSON.stringify({type:'ps',categoria:`${data}`,n:n,ne:nummin,c:cityCateg})                      
+                                                                    },
+                                                                    {
+                                                                        text:`${de}/${le}`,
+                                                                        callback_data: JSON.stringify({type:'vvv'})                      
+                                                                    },
+                                                                    {
+                                                                        text:'>>',
+                                                                        callback_data: JSON.stringify({type:'ns',categoria:`${data}`,n:n,ne:numplu,c:cityCateg})                      
+                                                                    },
+                                                                ]
+                                                )
