@@ -98,9 +98,6 @@ const publictime = new CronJob('*/1 * * * *', () => {
                             AdminArray.forEach(c=>{
                             bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${c.Amount}$.`, {
                                 parse_mode: 'html',
-                                reply_markup: {
-                                    inline_keyboard: ib.getInlineLink()
-                                }
                             })
                             })
 
