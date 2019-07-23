@@ -38,7 +38,7 @@ module.exports = {
             }],[{
                 text: 'Отмена »',
                 callback_data: JSON.stringify({
-                    type: 'deleteMessege',
+                    type: 'deleteMessage',
                 })
             }],
         ]
