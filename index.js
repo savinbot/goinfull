@@ -145,6 +145,37 @@ bot.onText(/\/start/, msg => {
     
 })
 
+
+bot.onText(/\/newpost/, msg => {
+    var chatId = msg.chat.id
+    AdminArray.forEach(c => {
+        if (c === chatId) {
+            newPost(chatId)
+        }
+    })
+
+
+
+})
+function newPost(chatId) {
+            User.updateMany({
+                telegramId: chatId
+            }, {
+                $set: {
+                    Way: 'PostInput',
+                }
+            }, function(err, res) {})
+
+
+            bot.sendMessage(chatId, `Отправьте, или перешлите боту, что вы хотите разослать подписчикам, либо вызовите команду /stop:`, {
+                parse_mode: 'html',
+                reply_markup: {
+                    remove_keyboard: true,
+                }
+
+            })
+}
+
 bot.onText(/\/stop/, msg => {
     var chatId = msg.chat.id
     bot.sendMessage(chatId, 'Отменено!', {
@@ -496,6 +527,33 @@ bot.on('message', msg => {
                             }
                         })
                     }
+            case 'PostInput':
+                if (msg.text.slice(0, 1) !== '/' && msg.text !== '/start' && msg.text !== '/newpost') {
+                                    bot.sendMessage(chatId, `Отлично.`, {
+                                        reply_markup: {
+                                            resize_keyboard: true,
+                                            keyboard: keyboard.Home
+                                        }
+                                    })                    
+                                        bot.sendMessage(chatId, `Выберите Категорию, которой делать рассылку:`, {
+                                            parse_mode: 'html',
+                                            reply_to_message_id: msg.message_id,
+                                            reply_markup: {
+                                                inline_keyboard: ib.getInlineListForPost(msg.message_id)
+                                            }
+                                        })
+
+                            User.updateMany({
+                                telegramId: chatId
+                            }, {
+                                $set: {
+                                    Way: ' ',
+                                }
+                            }, function(err, res) {})
+                        
+
+                }
+                break;
 
                     break
                 default:
@@ -547,6 +605,41 @@ bot.on('callback_query', query => {
     } = JSON.parse(query.data)
 
     switch (type) {
+        case 'sendPostall'
+            bot.answerCallbackQuery({
+                callback_query_id: query.id,
+                text: `✔️ Ваше сообщение отправлено всем подписчикам.`,
+                show_alert: true
+            })
+            User.find({}).then(users=>{
+                if (users.length) {
+                    users.forEach(c => {
+                        bot.forwardMessage(c.telegramId, chatId, data)
+                    })
+                }
+            })
+
+            break
+        case 'sendPost0balance'
+            bot.answerCallbackQuery({
+                callback_query_id: query.id,
+                text: `✔️ Ваше сообщение отправлено подписчикам, у которых баланс 0$.`,
+                show_alert: true
+            })
+            User.find({}).then(users=>{
+                users.forEach(c => {
+                        if (c.Balance === 0) {
+                            bot.forwardMessage(c.telegramId, chatId, data)
+                        } 
+                    
+                })
+            })
+            break
+
+        case 'deleteMessage':
+            bot.deleteMessage(chatId, messageId)
+            break
+
         case 'SelState':
             sendCity(chatId, messageId, query, data, 0)
             break
