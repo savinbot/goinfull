@@ -602,7 +602,7 @@ bot.on('callback_query', query => {
     } = JSON.parse(query.data)
 
     switch (type) {
-        case 'sendPostall'
+        case 'sendPostall':
             bot.answerCallbackQuery({
                 callback_query_id: query.id,
                 text: `✔️ Ваше сообщение отправлено всем подписчикам.`,
@@ -617,7 +617,7 @@ bot.on('callback_query', query => {
             })
 
             break
-        case 'sendPost0balance'
+        case 'sendPost0balance':
             bot.answerCallbackQuery({
                 callback_query_id: query.id,
                 text: `✔️ Ваше сообщение отправлено подписчикам, у которых баланс 0$.`,
