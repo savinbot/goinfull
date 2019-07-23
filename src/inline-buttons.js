@@ -20,6 +20,29 @@ module.exports = {
             }],
         ]
     },
+    getInlineListForPost(messageId) {
+        return [
+            [{
+                text: 'Всем подписчикам »',
+                callback_data: JSON.stringify({
+                    type: 'sendPostall',
+                    data: messageId,
+                })
+            }],
+            [{
+                text: 'У кого баланс 0$ »',
+                callback_data: JSON.stringify({
+                    type: 'sendPost0balance',
+                    data: messageId,
+                })
+            }],[{
+                text: 'Отмена »',
+                callback_data: JSON.stringify({
+                    type: 'deleteMessege',
+                })
+            }],
+        ]
+    },
     getInlineLinkRefillBalance(url) {
         return [
             [ {
