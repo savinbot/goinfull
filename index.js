@@ -524,6 +524,7 @@ bot.on('message', msg => {
                             }
                         })
                     }
+                break
             case 'PostInput':
                 if (msg.text.slice(0, 1) !== '/' && msg.text !== '/start' && msg.text !== '/newpost') {
                                     bot.sendMessage(chatId, `Отлично.`, {
@@ -657,10 +658,7 @@ bot.on('callback_query', query => {
                         if (user.Balance >= type.Price) {
                             AdminArray.forEach(c=>{
                             bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${query.from.first_name}</a> совершил покупку товара ${product.Name}.`, {
-                                parse_mode: 'html',
-                                reply_markup: {
-                                    inline_keyboard: ib.getInlineLink()
-                                }
+                                parse_mode: "html"
                             })
                             })
                             bot.editMessageText(`➡️ <b>Сделка прошла успешно!</b> Списание средств со счета <b>-${type.Price}$</b>. Ваш баланс: <b>${user.Balance - type.Price}$</b>.\n Хорошего дня!`, {
