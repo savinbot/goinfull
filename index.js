@@ -553,7 +553,7 @@ bot.on('message', msg => {
                 }
                 break;
 
-                    break
+                    
                 default:
                     switch (msg.text) {
                         case kb.Home.MyOffice:
