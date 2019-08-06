@@ -85,92 +85,13 @@ Wallet.getOperationHistory({rows: 5, operation: "IN"}, (err, operations) => {
           console.log('1');
           Tranz_info.findOne({id:c.comment,Active: true}).then(tranz_info=>{
           console.log('2');
-//               if (tranz_info && c.total.amount >= tranz_info.Amount && c.total.currency === 663) {
-               if (tranz_info) {
+               if (tranz_info && c.total.amount >= tranz_info.Amount && c.total.currency === 663) {
+               // if (tranz_info) {
           console.log('SUCCESS');
                var chatId = tranz_info.telegramId
-               var date = new Date().getTime()
+               
 
-                Promise.all([
-                    User.findOne({
-                        telegramId: chatId
-                    }),
-                    Tarif.findOne({
-                        id: tranz_info.NumberDeposit
-                    })
-                ]).then(([user, tarif]) => {
-                    if (user && tarif) {
-                        Tranz_info.updateMany({
-                            _id:c.comment
-                        }, {
-                            $set: {
-                                Active: false,
-                                TimeOff: timeoff
-                            }
-                        }, function(err, res) {})
-
-                        var timeoff = parseInt(date) + parseInt(tarif.Time)
-                        var text = `Спасибо, Ты оплатил тариф "${tarif.Name}".\n- Подписка, согласно тарифному плану, подключена автоматически. Приятного просмотра!`
-                        if (user.Tarif == tarif._id && parseInt(user.TimeOff) > parseInt(date)) {
-                            timeoff = timeoff + (parseInt(user.TimeOff) - parseInt(date))
-                            text = `Спасибо, Ты продлил тариф "${tarif.Name}".\nПриятного просмотра!`
-                        }
-
-
-                        Promise.all([
-                            User.find({
-                                RefOneLevel: {
-                                    "$in": chatId
-                                }
-                            }),
-                            User.find({
-                                RefTwoLevel: {
-                                    "$in": chatId
-                                }
-                            }),
-                            User.find({
-                                RefThreeLevel: {
-                                    "$in": chatId
-                                }
-                            })
-                        ]).then(([refOneLevels, refTwoLevels, refThreeLevels]) => {
-                            const awardOneLine = (c.total.amount) * PercentageOneLine
-                            const awardTwoLine = (c.total.amount) * PercentageTwoLine
-                            const awardThreeLine = (c.total.amount) * PercentageThreeLine
-
-                            updateUserBalance(refOneLevels, awardOneLine, '1', chatId)
-                            updateUserBalance(refTwoLevels, awardTwoLine, '2', chatId)
-                            updateUserBalance(refThreeLevels, awardThreeLine, '3', chatId)
-
-
-                        })
-
-
-                        User.updateMany({
-                            telegramId: chatId
-                        }, {
-                            $set: {
-                                Tarif: tarif._id,
-                                TimeOff: timeoff
-                            }
-                        }, function(err, res) {})
-                    }
-
-                    bot.sendMessage(chatId, text, {
-                        parse_mode: 'html',
-                        reply_markup: {
-                            inline_keyboard: ib.getInlineStart()
-                        }
-                    })
-
-                    bot.sendMessage(adminChatIdVlad, `Пополнение через  киви!!!!`, {
-                        parse_mode: 'html',
-                        reply_markup: {
-                            inline_keyboard: ib.getInlineStart()
-                        }
-                    })
-
-                }).catch(function(error) {})
+                
               }
           })
       }
