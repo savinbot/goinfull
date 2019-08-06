@@ -89,7 +89,40 @@ Wallet.getOperationHistory({rows: 5, operation: "IN"}, (err, operations) => {
                // if (tranz_info) {
           console.log('SUCCESS');
                var chatId = tranz_info.telegramId
-               
+
+               Tranz_info.updateMany({
+                                _id: c._id
+                            }, {
+                                $set: {
+                                    Active: false,
+                                }
+                            }, function(err, res) {})
+
+                            log('eeeeeeeeeeeeee')
+                            log(invoice)
+                            AdminArray.forEach(d=>{
+                            bot.sendMessage(d, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${c.Amount}$.`, {
+                                parse_mode: 'html',
+                            })
+                            })
+
+                            bot.sendMessage(c.telegramId, `Ваш баланс пополнен на ${c.Amount}$. Приятного пользования 😊)`, {
+                                parse_mode: 'html',
+                            })
+                            User.findOne({
+                                telegramId: c.telegramId
+                            }).then(user => {
+                                if (user) {
+                                    User.updateMany({
+                                        telegramId: c.telegramId
+                                    }, {
+                                        $set: {
+                                            Balance: user.Balance + c.Amount,
+
+                                        }
+                                    }, function(err, res) {})
+                                }
+                            })
 
                 
               }
@@ -117,8 +150,8 @@ Tranz_info.find({
 
                             log('eeeeeeeeeeeeee')
                             log(invoice)
-                            AdminArray.forEach(c=>{
-                            bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${c.Amount}$.`, {
+                            AdminArray.forEach(d=>{
+                            bot.sendMessage(d, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${c.Amount}$.`, {
                                 parse_mode: 'html',
                             })
                             })
