@@ -37,6 +37,8 @@ const adminChatIdFullaInfo = 388510590 // Администрат3
 
 const AdminArray = [adminChatIdVlad, adminChatIdAndrey, adminChatIdFullaInfo]
 
+var Qiwi = require('node-qiwi-api').Qiwi;
+var Wallet = new Qiwi('a3f8d9d40d021d7dfb7411a0893800e4');
 
 mongoose.Promise = global.Promise
 mongoose.connect(config.DB_URL, {
