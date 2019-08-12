@@ -14,7 +14,6 @@ const Tranz_info = new Schema({
   },
   InvoiceId: {
     type: String,
-    required: true,
   },
   Active: {
     type: Boolean,
@@ -27,7 +26,6 @@ const Tranz_info = new Schema({
   },
   Amount: {
     type: Number,
-    required: true
   },
 })
 
