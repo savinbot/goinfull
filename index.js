@@ -151,11 +151,11 @@ const publictimeqiwi = new CronJob('*/1 * * * *', () => {
                     if (tranz_info && c.total.currency === 643) {
 
                         var chatId = tranz_info.telegramId
-                            // AdminArray.forEach(a=>{
-                            // bot.sendMessage(a, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${parseFloat((c.total.amount/100)/63).toFixed(3)}$ через систему Qiwi.`, {
-                            //     parse_mode: 'html',
-                            // })
-                            // })
+                            AdminArray.forEach(a=>{
+                            bot.sendMessage(a, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${parseFloat((c.total.amount/100)/63).toFixed(3)}$ через систему Qiwi.`, {
+                                parse_mode: 'html',
+                            })
+                            })
 
                             bot.sendMessage(chatId, `Ваш баланс пополнен на ${parseFloat((c.total.amount/100)/63).toFixed(3)}$. Приятного пользования 😊)`, {
                                 parse_mode: 'html',
