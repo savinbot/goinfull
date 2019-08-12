@@ -96,8 +96,8 @@ const publictime = new CronJob('*/1 * * * *', () => {
                                 }
                             }, function(err, res) {})
 
-                            AdminArray.forEach(c=>{
-                            bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${c.Amount}$.`, {
+                            AdminArray.forEach(a=>{
+                            bot.sendMessage(a, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${c.Amount}$.`, {
                                 parse_mode: 'html',
                             })
                             })
@@ -144,11 +144,10 @@ const publictimeqiwi = new CronJob('*/1 * * * *', () => {
                     id: c.comment,
                     Active: true
                 }).then(tranz_info => {
-                        var chatId = tranz_info.telegramId
                     if (tranz_info && c.total.currency === 663) {
-                        log(tranz_info)
-                            AdminArray.forEach(c=>{
-                            bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${parseFloat(c.total.amount/63).toFixed(3)}$ через систему Qiwi.`, {
+                        var chatId = tranz_info.telegramId
+                            AdminArray.forEach(a=>{
+                            bot.sendMessage(a, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${parseFloat(c.total.amount/63).toFixed(3)}$ через систему Qiwi.`, {
                                 parse_mode: 'html',
                             })
                             })
@@ -156,7 +155,7 @@ const publictimeqiwi = new CronJob('*/1 * * * *', () => {
                             bot.sendMessage(chatId, `Ваш баланс пополнен на ${parseFloat(c.total.amount/63).toFixed(3)}$. Приятного пользования 😊)`, {
                                 parse_mode: 'html',
                             })
-                        User.findOne({telegramId:tranz_info.telegramId}).then(user=>{
+                        User.findOne({telegramId:chatId}).then(user=>{
                                 User.updateMany({
                                     telegramId: chatId
                                 }, {
