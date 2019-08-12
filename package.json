@@ -14,6 +14,7 @@
     "cron": "^1.6.0",
     "fs": "0.0.1-security",
     "mongoose": "^5.3.11",
+    "node-qiwi-api": "^1.1.1",
     "node-telegram-bot-api": "^0.30.0",
     "node-xlsx": "^0.15.0"
   }
