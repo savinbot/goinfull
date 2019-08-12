@@ -86,8 +86,8 @@ const publictime = new CronJob('*/1 * * * *', () => {
             tranz_info.forEach(c => {
                 client.get_invoice(c.InvoiceId)
                     .then(invoice => {
-                        log(invoice.status)
-                        if (invoice.status === 'confirmed' || invoice.status === 'complete' || invoice.status === 'paid') {
+                        // log(invoice.status)
+                        if (invoice && invoice.status === 'confirmed' || invoice.status === 'complete' || invoice.status === 'paid') {
                             Tranz_info.updateMany({
                                 _id: c._id
                             }, {
@@ -120,13 +120,13 @@ const publictime = new CronJob('*/1 * * * *', () => {
                                 }
                             })
                         }
-                        if (invoice.status === 'expired') {
+                        if (invoice && invoice.status === 'expired') {
                             Tranz_info.deleteOne(({
                                 _id: c._id
                             }), function(err, result) {})
                         }
                     })
-                    .catch(err => console.log(err))
+                    .catch(err => console.log('err'))
             })
         }
     })
@@ -144,15 +144,20 @@ const publictimeqiwi = new CronJob('*/1 * * * *', () => {
                     id: c.comment,
                     Active: true
                 }).then(tranz_info => {
-                    if (tranz_info && c.total.currency === 663) {
-                        var chatId = tranz_info.telegramId
-                            AdminArray.forEach(a=>{
-                            bot.sendMessage(a, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${parseFloat(c.total.amount/63).toFixed(3)}$ через систему Qiwi.`, {
-                                parse_mode: 'html',
-                            })
-                            })
+                    if (tranz_info) {
+                                        log(c.total)
 
-                            bot.sendMessage(chatId, `Ваш баланс пополнен на ${parseFloat(c.total.amount/63).toFixed(3)}$. Приятного пользования 😊)`, {
+                    }
+                    if (tranz_info && c.total.currency === 643) {
+
+                        var chatId = tranz_info.telegramId
+                            // AdminArray.forEach(a=>{
+                            // bot.sendMessage(a, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${parseFloat((c.total.amount/100)/63).toFixed(3)}$ через систему Qiwi.`, {
+                            //     parse_mode: 'html',
+                            // })
+                            // })
+
+                            bot.sendMessage(chatId, `Ваш баланс пополнен на ${parseFloat((c.total.amount/100)/63).toFixed(3)}$. Приятного пользования 😊)`, {
                                 parse_mode: 'html',
                             })
                         User.findOne({telegramId:chatId}).then(user=>{
@@ -539,7 +544,7 @@ bot.on('message', msg => {
                                         Amount: parseFloat(msg.text).toFixed(3)
                                     }).save().then(newstate => {
                                         if (newstate) {
-                                            State.updateMany({
+                                            Tranz_info.updateMany({
                                                 _id: newstate._id
                                             }, {
                                                 $set: {
@@ -808,8 +813,17 @@ bot.on('callback_query', query => {
                                         telegramId: chatId,
                                         Active: true,
                                     }).save().then(newtranzinfo => {
-
-                var qiwiurl = `https://w.qiwi.com/payment/form/99?currency=643&amountFraction=0&extra[%27account%27]=${config.QIWIPORTMONEY}&extra[%27comment%27]=${newtranzinfo._id}`
+                                        if (newtranzinfo) {
+                                            Tranz_info.updateMany({
+                                                _id: newtranzinfo._id
+                                            }, {
+                                                $set: {
+                                                    id: newtranzinfo._id
+                                                }
+                                            }, function(err, res) {})
+                                        }
+                                                    
+                                    var qiwiurl = `https://w.qiwi.com/payment/form/99?currency=643&amountFraction=0&extra[%27account%27]=${config.QIWIPORTMONEY}&extra[%27comment%27]=${newtranzinfo._id}`
                 bot.sendMessage(chatId, text, {
                     parse_mode: 'html',
                     reply_markup: {
