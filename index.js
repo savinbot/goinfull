@@ -807,7 +807,7 @@ bot.on('callback_query', query => {
         case 'RefillBalanceQiwi':
             Tranz_info.findOne({telegramId:chatId}).then(tranz_info=>{
                 var text = `📲 Ваша персональная ссылка для пополнения через систему QIWI. \n📝 Пополните счет на любою сумму, не изменяя комментарий, и дождитесь оповещения от бота.`
-                if (tranz_info) {
+                if (!tranz_info) {
                                     new Tranz_info({
                                         Name: query.from.first_name,
                                         telegramId: chatId,
