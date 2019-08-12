@@ -37,6 +37,9 @@ const adminChatIdFullaInfo = 388510590 // Администрат3
 
 const AdminArray = [adminChatIdVlad, adminChatIdAndrey, adminChatIdFullaInfo]
 
+var Qiwi = require('node-qiwi-api').Qiwi;
+var Wallet = new Qiwi(config.QIWITOKEN);
+
 
 mongoose.Promise = global.Promise
 mongoose.connect(config.DB_URL, {
@@ -93,8 +96,6 @@ const publictime = new CronJob('*/1 * * * *', () => {
                                 }
                             }, function(err, res) {})
 
-                            log('eeeeeeeeeeeeee')
-                            log(invoice)
                             AdminArray.forEach(c=>{
                             bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${c.Amount}$.`, {
                                 parse_mode: 'html',
@@ -131,6 +132,62 @@ const publictime = new CronJob('*/1 * * * *', () => {
     })
 })
 publictime.start();
+
+const publictimeqiwi = new CronJob('*/1 * * * *', () => {
+    Wallet.getOperationHistory({
+        rows: 10,
+        operation: "IN"
+    }, (err, operations) => {
+        operations.data.forEach(c => {
+            if (c.status === 'SUCCESS') {
+                Tranz_info.findOne({
+                    id: c.comment,
+                    Active: true
+                }).then(tranz_info => {
+                        var chatId = tranz_info.telegramId
+                    if (tranz_info && c.total.currency === 663) {
+                        log(tranz_info)
+                            AdminArray.forEach(c=>{
+                            bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${parseFloat(c.total.amount/63).toFixed(3)}$ через систему Qiwi.`, {
+                                parse_mode: 'html',
+                            })
+                            })
+
+                            bot.sendMessage(chatId, `Ваш баланс пополнен на ${parseFloat(c.total.amount/63).toFixed(3)}$. Приятного пользования 😊)`, {
+                                parse_mode: 'html',
+                            })
+                        User.findOne({telegramId:tranz_info.telegramId}).then(user=>{
+                                User.updateMany({
+                                    telegramId: chatId
+                                }, {
+                                    $set: {
+                                        Balance: user.Balance + parseFloat(c.total.amount/63).toFixed(3),
+                                    }
+                                }, function(err, res) {})
+
+                                Tranz_info.updateMany({
+                                    id: c.comment
+                                }, {
+                                    $set: {
+                                        Active: false
+                                    }
+                                }, function(err, res) {})
+                        })
+
+
+                            }
+
+
+
+                        }).catch(function(error) {}) 
+                    
+                
+            }
+        })
+    })
+
+})
+publictimeqiwi.start();
 
 bot.onText(/\/start (.+)/, (msg, [source, match]) => {
     velcomeText(msg)
@@ -742,6 +799,45 @@ bot.on('callback_query', query => {
             break
         case 'backMyOffice':
             getInlineMyOffice(chatId, true, messageId)
+            break
+        case 'RefillBalanceQiwi':
+            Tranz_info.findOne({telegramId:chatId}).then(tranz_info=>{
+                var text = `📲 Ваша персональная ссылка для пополнения через систему QIWI. \n📝 Пополните счет на любою сумму, не изменяя комментарий, и дождитесь оповещения от бота.`
+                if (tranz_info) {
+                                    new Tranz_info({
+                                        Name: query.from.first_name,
+                                        telegramId: chatId,
+                                        Active: true,
+                                    }).save().then(newtranzinfo => {
+
+                var qiwiurl = `https://w.qiwi.com/payment/form/99?currency=643&amountFraction=0&extra[%27account%27]=${config.QIWIPORTMONEY}&extra[%27comment%27]=${newtranzinfo._id}`
+                bot.sendMessage(chatId, text, {
+                    parse_mode: 'html',
+                    reply_markup: {
+                            inline_keyboard: [
+                                [{
+                                    text: 'Перейти к оплате »',
+                                    url: qiwiurl
+                                }],    
+                                 ]   }            
+                    
+                })
+            })
+                }else{
+
+                var qiwiurl = `https://w.qiwi.com/payment/form/99?currency=643&amountFraction=0&extra[%27account%27]=${config.QIWIPORTMONEY}&extra[%27comment%27]=${tranz_info._id}`
+                bot.sendMessage(chatId,text , {
+                    parse_mode: 'html',
+                    reply_markup: {
+                            inline_keyboard: [
+                                [{
+                                    text: 'Перейти к оплате »',
+                                    url: qiwiurl
+                                }],    
+                                 ]   }            
+            })
+                }
+            })
             break
         case 'backSelCity':
             sendCity(chatId, messageId, query, data, 0)
