@@ -66,6 +66,12 @@ module.exports = {
                 })
             }],
             [{
+                text: 'Пополнить QIWI »',
+                callback_data: JSON.stringify({
+                    type: 'RefillBalanceQiwi',
+                })
+            }],
+            [{
                 text: '« Назад',
                 callback_data: JSON.stringify({
                     type: 'backMyOffice',
