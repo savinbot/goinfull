@@ -37,8 +37,6 @@ const adminChatIdFullaInfo = 388510590 // Администрат3
 
 const AdminArray = [adminChatIdVlad, adminChatIdAndrey, adminChatIdFullaInfo]
 
-var Qiwi = require('node-qiwi-api').Qiwi;
-var Wallet = new Qiwi('a3f8d9d40d021d7dfb7411a0893800e4');
 
 mongoose.Promise = global.Promise
 mongoose.connect(config.DB_URL, {
@@ -78,60 +76,7 @@ const client = new btcpay.BTCPayClient(BTCPAY_URL, keypair, {
 
 
 const publictime = new CronJob('*/1 * * * *', () => {
-    
-Wallet.getOperationHistory({rows: 5, operation: "IN"}, (err, operations) => {
-  operations.data.forEach(c=>{
-      if (c.status === 'SUCCESS') {
-          console.log('1');
-          Tranz_info.findOne({id:c.comment,Active: true}).then(tranz_info=>{
-          console.log('2');
-               if (tranz_info && c.total.amount >= tranz_info.Amount && c.total.currency === 663) {
-               // if (tranz_info) {
-          console.log('SUCCESS');
-               var chatId = tranz_info.telegramId
-
-               Tranz_info.updateMany({
-                                _id: c._id
-                            }, {
-                                $set: {
-                                    Active: false,
-                                }
-                            }, function(err, res) {})
-
-                            log('eeeeeeeeeeeeee')
-                            log(invoice)
-                            AdminArray.forEach(d=>{
-                            bot.sendMessage(d, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${c.Amount}$.`, {
-                                parse_mode: 'html',
-                            })
-                            })
-
-                            bot.sendMessage(c.telegramId, `Ваш баланс пополнен на ${c.Amount}$. Приятного пользования 😊)`, {
-                                parse_mode: 'html',
-                            })
-                            User.findOne({
-                                telegramId: c.telegramId
-                            }).then(user => {
-                                if (user) {
-                                    User.updateMany({
-                                        telegramId: c.telegramId
-                                    }, {
-                                        $set: {
-                                            Balance: user.Balance + c.Amount,
-
-                                        }
-                                    }, function(err, res) {})
-                                }
-                            })
-
-                
-              }
-          })
-      }
-  })
-})
-
-Tranz_info.find({
+    Tranz_info.find({
         Active: true
     }).then(tranz_info => {
         if (tranz_info.length) {
@@ -150,8 +95,8 @@ Tranz_info.find({
 
                             log('eeeeeeeeeeeeee')
                             log(invoice)
-                            AdminArray.forEach(d=>{
-                            bot.sendMessage(d, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${c.Amount}$.`, {
+                            AdminArray.forEach(c=>{
+                            bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${c.Amount}$.`, {
                                 parse_mode: 'html',
                             })
                             })
@@ -579,7 +524,6 @@ bot.on('message', msg => {
                             }
                         })
                     }
-                break
             case 'PostInput':
                 if (msg.text.slice(0, 1) !== '/' && msg.text !== '/start' && msg.text !== '/newpost') {
                                     bot.sendMessage(chatId, `Отлично.`, {
@@ -608,7 +552,7 @@ bot.on('message', msg => {
                 }
                 break;
 
-                    
+                    break
                 default:
                     switch (msg.text) {
                         case kb.Home.MyOffice:
@@ -713,7 +657,10 @@ bot.on('callback_query', query => {
                         if (user.Balance >= type.Price) {
                             AdminArray.forEach(c=>{
                             bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${query.from.first_name}</a> совершил покупку товара ${product.Name}.`, {
-                                parse_mode: "html"
+                                parse_mode: 'html',
+                                reply_markup: {
+                                    inline_keyboard: ib.getInlineLink()
+                                }
                             })
                             })
                             bot.editMessageText(`➡️ <b>Сделка прошла успешно!</b> Списание средств со счета <b>-${type.Price}$</b>. Ваш баланс: <b>${user.Balance - type.Price}$</b>.\n Хорошего дня!`, {
