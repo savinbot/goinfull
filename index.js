@@ -144,30 +144,31 @@ const publictimeqiwi = new CronJob('*/1 * * * *', () => {
                     id: c.comment,
                     Active: true
                 }).then(tranz_info => {
-                    if (tranz_info) {
-                                        log(c.total)
-
-                    }
                     if (tranz_info && c.total.currency === 643) {
 
                         var chatId = tranz_info.telegramId
-                            AdminArray.forEach(a=>{
-                            bot.sendMessage(a, `<a href="tg://user?id=${chatId}">${tranz_info.Name}</a> пополнил свой баланс на ${parseFloat((c.total.amount)/63).toFixed(3)}$ через систему Qiwi.`, {
-                                parse_mode: 'html',
-                            })
-                            })
-
-            log()
-
-                            bot.sendMessage(chatId, `Ваш баланс пополнен на ${parseFloat((c.total.amount)/63).toFixed(3)}$. Приятного пользования 😊)`, {
-                                parse_mode: 'html',
-                            })
                         User.findOne({telegramId:chatId}).then(user=>{
+                            var bal = user.Balance
+                            var am = c.total.amount/63
+                            var resul = (bal+am).toFixed(2)
+
+                            AdminArray.forEach(a=>{
+                            bot.sendMessage(a, `<a href="tg://user?id=${chatId}">${tranz_info.Name}</a> пополнил свой баланс на ${resul}$ через систему Qiwi.`, {
+                                parse_mode: 'html',
+                            })
+                            })
+
+
+                            bot.sendMessage(chatId, `Ваш баланс пополнен на ${resul}$. Приятного пользования 😊)`, {
+                                parse_mode: 'html',
+                            })
+
+
                                 User.updateMany({
                                     telegramId: chatId
                                 }, {
                                     $set: {
-                                        Balance: parseFloat(user.Balance) + parseFloat((c.total.amount)/63).toFixed(3),
+                                        Balance: resul,
                                     }
                                 }, function(err, res) {})
 
