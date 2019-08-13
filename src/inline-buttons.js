@@ -48,7 +48,7 @@ module.exports = {
             [ {
                 text: '« Назад',
                 callback_data: JSON.stringify({
-                    type: 'backMyOffice',
+                    type: 'myBalance',
                 })
             },{
                 text: 'Перейти к оплате »',
@@ -66,7 +66,7 @@ module.exports = {
                 })
             }],
             [{
-                text: 'Пополнить QIWI »',
+                text: 'Пополнить в QIWI »',
                 callback_data: JSON.stringify({
                     type: 'RefillBalanceQiwi',
                 })
@@ -95,10 +95,10 @@ module.exports = {
         ]
     },
 
-    getInlinePayProducts(product,price) {
+    getInlinePayProducts(product,price,priceRub) {
         return [
             [{
-                text: `💎 Купить 1шт. - ${price}$ »`,
+                text: `💎 Купить 1шт. - ${price}$ (~${priceRub}₽) »`,
                 callback_data: JSON.stringify({
                     type: 'payProduct',
                     data: product.State,
