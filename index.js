@@ -585,6 +585,7 @@ bot.on('message', msg => {
                             }
                         })
                     }
+                break;
             case 'PostInput':
                 if (msg.text.slice(0, 1) !== '/' && msg.text !== '/start' && msg.text !== '/newpost') {
                                     bot.sendMessage(chatId, `Отлично.`, {
@@ -611,7 +612,6 @@ bot.on('message', msg => {
                         
 
                 }
-                break;
 
                     break
                 default:
