@@ -135,7 +135,7 @@ publictime.start();
 
 const publictimeqiwi = new CronJob('*/1 * * * *', () => {
     Wallet.getOperationHistory({
-        rows: 10,
+        rows: 5,
         operation: "IN"
     }, (err, operations) => {
         operations.data.forEach(c => {
@@ -805,7 +805,7 @@ bot.on('callback_query', query => {
             getInlineMyOffice(chatId, true, messageId)
             break
         case 'RefillBalanceQiwi':
-            Tranz_info.findOne({telegramId:chatId}).then(tranz_info=>{
+            Tranz_info.findOne({telegramId:chatId,Active:true}).then(tranz_info=>{
                 var text = `📲 Ваша персональная ссылка для пополнения через систему QIWI. \n📝 Пополните счет на любою сумму, не изменяя комментарий, и дождитесь оповещения от бота.`
                 if (!tranz_info) {
                                     new Tranz_info({
