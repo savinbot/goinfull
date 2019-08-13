@@ -153,7 +153,7 @@ const publictimeqiwi = new CronJob('*/1 * * * *', () => {
             const resultrur = data.filter(item => item.ccy === 'RUR')[0];
             const resultusd = data.filter(item => item.ccy === 'USD')[0];
 
-            var result = Math.ceil(((1*resultusd.sale)*(1/resultrur.sale)))
+            var result = (1*resultusd.sale)*(1/resultrur.sale)
 
                         var chatId = tranz_info.telegramId
                         User.findOne({telegramId:chatId}).then(user=>{
@@ -162,13 +162,13 @@ const publictimeqiwi = new CronJob('*/1 * * * *', () => {
                             var resul = (bal+am).toFixed(2)
 
                             AdminArray.forEach(a=>{
-                            bot.sendMessage(a, `<a href="tg://user?id=${chatId}">${tranz_info.Name}</a> пополнил свой баланс на ${am.toFixed(2)}$ через систему Qiwi.`, {
+                            bot.sendMessage(a, `<a href="tg://user?id=${chatId}">${tranz_info.Name}</a> пополнил свой баланс на ${am.toFixed(2)}$ (${c.total.amount}₽) через систему Qiwi.`, {
                                 parse_mode: 'html',
                             })
                             })
 
 
-                            bot.sendMessage(chatId, `Ваш баланс пополнен на ${am.toFixed(2)}$. Приятного пользования 😊)`, {
+                            bot.sendMessage(chatId, `Ваш баланс пополнен на ${am.toFixed(2)}$ (${c.total.amount}₽). Приятного пользования 😊)`, {
                                 parse_mode: 'html',
                             })
 
