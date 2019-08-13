@@ -976,6 +976,16 @@ function velcomeText(msg) {
                     parse_mode: 'html',
                 })
             })
+        }else{
+            User.updateMany({
+                telegramId: chatId
+            }, {
+                $set: {
+                    Way: '',
+                    TempData: ''
+
+                }
+            }, function(err, res) {})
         }
 
     })
@@ -1109,7 +1119,7 @@ async function getInlineListCitys(chatId, messageId, citys, typeName, stateName,
                 }
             ],
         )
-        var txt = citys[0].Type === 'Google Voice' ? 'код телефона' : 'город'
+        var txt = citys[0].Type === 'Google Voice' ? 'код телефона' : 'Город'
 
         bot.editMessageText(`Ваши данные:\n- <b>Тип:</b> ${typeName}.\n- <b>Штат:</b> ${stateName}.\nТеперь выберите, интересующий Вас ${txt}:`, {
             chat_id: chatId,
@@ -1156,7 +1166,7 @@ function sendViewProduct(chatId, messageId, query, data) {
                     })
                 ]).then(([state, city, type]) => {
 
-                    var txt = product.Name === 'Google Voice' ? 'Код телефона' : 'город'
+                    var txt = product.Name === 'Google Voice' ? 'Код телефона' : 'Город'
 
                     bot.editMessageText(`🛍 Вы заполнили необходимые данные!\n___\n- <b>Название:</b>  ${product.Name}.\n- <b>Штат:</b> ${state.Name}.\n- <b>${txt}:</b> ${city.Name}.\n- <b>Доступно:</b> ${products.length}шт.\n\n<i>После покупки, бот мгновенно пришлет вам данные, согласно запросу!</i>`, {
                         chat_id: chatId,
