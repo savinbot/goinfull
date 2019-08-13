@@ -153,13 +153,13 @@ const publictimeqiwi = new CronJob('*/1 * * * *', () => {
                             var resul = (bal+am).toFixed(2)
 
                             AdminArray.forEach(a=>{
-                            bot.sendMessage(a, `<a href="tg://user?id=${chatId}">${tranz_info.Name}</a> пополнил свой баланс на ${resul}$ через систему Qiwi.`, {
+                            bot.sendMessage(a, `<a href="tg://user?id=${chatId}">${tranz_info.Name}</a> пополнил свой баланс на ${am.toFixed(2)}$ через систему Qiwi.`, {
                                 parse_mode: 'html',
                             })
                             })
 
 
-                            bot.sendMessage(chatId, `Ваш баланс пополнен на ${resul}$. Приятного пользования 😊)`, {
+                            bot.sendMessage(chatId, `Ваш баланс пополнен на ${am.toFixed(2)}$. Приятного пользования 😊)`, {
                                 parse_mode: 'html',
                             })
 
