@@ -102,7 +102,7 @@ const publictime = new CronJob('*/1 * * * *', () => {
                             }, function(err, res) {})
 
                             AdminArray.forEach(a=>{
-                            bot.sendMessage(a, `<a href="tg://user?id=${c.telegramI}">${c.Name}</a> пополнил свой баланс на ${summ.toFixed(2)}$.`, {
+                            bot.sendMessage(a, `<a href="tg://user?id=${c.telegramId}">${c.Name}</a> пополнил свой баланс на ${summ.toFixed(2)}$.`, {
                                 parse_mode: 'html',
                             })
                             })
@@ -114,11 +114,15 @@ const publictime = new CronJob('*/1 * * * *', () => {
                                 telegramId: c.telegramId
                             }).then(user => {
                                 if (user) {
+                                    
+                                    var iii = parseFloat(user.Balance) + parseFloat(summ)
+                                    log((iii).toFixed(2))
+                                    log('--------')
                                     User.updateMany({
                                         telegramId: c.telegramId
                                     }, {
                                         $set: {
-                                            Balance: user.Balance + summ.toFixed(2),
+                                            Balance: (iii).toFixed(2),
 
                                         }
                                     }, function(err, res) {})
@@ -128,7 +132,7 @@ const publictime = new CronJob('*/1 * * * *', () => {
 
 
                     }
-                        if (invoices && invoices.status === -1) {
+                        if (invoices && invoices.status === -100) {
                             Tranz_info.deleteOne(({
                                 _id: c._id
                             }), function(err, result) {})
