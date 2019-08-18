@@ -84,7 +84,7 @@ const publictime = new CronJob('*/1 * * * *', () => {
             tranz_info.forEach(c => {
                 if (c.InvoiceId) {
                 clientcoinpayments.getTx({txid :c.InvoiceId}).then(invoices => {
-                    if (invoices && invoices.status === 100) {
+                    if (invoices && invoices.status === 100 || invoices && invoices.status_text === 'Waiting for confirms...') {
                         request('https://api.cryptonator.com/api/ticker/btc-usd', function(error, response, body) {
                             const data = JSON.parse(body)
                             var pr  = parseFloat(data.ticker.price)
