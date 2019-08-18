@@ -49,34 +49,32 @@ mongoose.connect(config.DB_URL, {
     .catch((err) => console.log(err))
 
 
-const privatKey = '344188e1bba3fdf5aeb7598aa34159ec7eb678f5a9f7c7919e796b68ab3687df'
-const merchat = 'GJTPZzDgTkvmzpbzd2NEzackEtUuZTdcq4HDMt5uJrc2'
-var BTCPAY_URL = 'https://btcpayjungle.com'
-
-const btcpay = require('btcpay')
-const keypair = btcpay.crypto.load_keypair(new Buffer.from(privatKey, 'hex'))
-
-// Recreate client
-const client = new btcpay.BTCPayClient(BTCPAY_URL, keypair, {
-    merchant: merchat
-})
-
-// log(privatKey)
-// var BTCPAY_URL='https://btcpayjungle.com'
-// var BTCPAY_KEY= privatKey
-// var BTCPAY_PAIRCODE= 'wCEbwLd'
-// log(`[space] BTCPAY_URL=${BTCPAY_URL}/ BTCPAY_KEY=344188e1bba3fdf5aeb7598aa34159ec7eb678f5a9f7c7919e796b68ab3687df BTCPAY_PAIRCODE=${BTCPAY_PAIRCODE} node -e "const btcpay=require('btcpay'); new btcpay.BTCPayClient(process.env.BTCPAY_URL, btcpay.crypto.load_keypair(Buffer.from(process.env.BTCPAY_KEY, 'hex'))).pair_client(process.env.BTCPAY_PAIRCODE).then(console.log).catch(console.error)"`)
-
-// // const btcpay = require('btcpay'); new btcpay.BTCPayClient(process.env.BTCPAY_URL, btcpay.crypto.load_keypair(Buffer.from(process.env.BTCPAY_KEY, 'hex'))).pair_client(process.env.BTCPAY_PAIRCODE).then(console.log).catch(console.error)
-
-
-// BTCPAY_URL=https://btcpayjungle.com/ BTCPAY_KEY=344188e1bba3fdf5aeb7598aa34159ec7eb678f5a9f7c7919e796b68ab3687df BTCPAY_PAIRCODE=wCEbwLd node -e "const btcpay=require('btcpay'); new btcpay.BTCPayClient(process.env.BTCPAY_URL, btcpay.crypto.load_keypair(Buffer.from(process.env.BTCPAY_KEY, 'hex'))).pair_client(process.env.BTCPAY_PAIRCODE).then(console.log).catch(console.error)"
 
 
 
 
-// BTCPAY_URL=https://mydomain.com/ BTCPAY_KEY=... BTCPAY_PAIRCODE=... node -e "const btcpay=require('btcpay'); new btcpay.BTCPayClient(process.env.BTCPAY_URL, btcpay.crypto.load_keypair(Buffer.from(process.env.BTCPAY_KEY, 'hex'))).pair_client(process.env.BTCPAY_PAIRCODE).then(console.log).catch(console.error)"
 
+
+const options = {key: `1161485cc5c3e2748bccc8821520c70890d9e5cbc88777b4c9633cf2f58933b3`,
+      secret: `dc60786E2De91d87A868aFFbC5FaDbe3a0ce6665c407721452358FE30a860D01`,}
+
+const Coinpayments = require("coinpayments");
+const clientcoinpayments = new Coinpayments(options);
+
+                            // clientcoinpayments.createTransaction({
+                            //         'currency1' : 'USD', 'currency2' : 'BTC', 'amount' : '1','buyer_email':'dsfsdfg@fgdf.com'
+                            //     })
+                            //     .then(invoice => {
+                            //         log(invoice)
+                            //     }).catch();
+
+// clientcoinpayments.getTxList ().then(invoice => {
+//                                     log(invoice)
+// clientcoinpayments.getTxMulti(invoice).then(invoices => {
+//                                     log(invoices)
+//                                 }).catch();
+
+//                                 }).catch();
 
 const publictime = new CronJob('*/1 * * * *', () => {
     Tranz_info.find({
@@ -84,11 +82,18 @@ const publictime = new CronJob('*/1 * * * *', () => {
     }).then(tranz_info => {
         if (tranz_info.length) {
             tranz_info.forEach(c => {
-                client.get_invoice(c.InvoiceId)
-                    .then(invoice => {
-                        // log(invoice.status)
-                        if (invoice && invoice.status === 'confirmed' || invoice.status === 'complete' || invoice.status === 'paid') {
-                            Tranz_info.updateMany({
+                if (c.InvoiceId) {
+                clientcoinpayments.getTx({txid :c.InvoiceId}).then(invoices => {
+                    if (invoices && invoices.status === 1) {
+                        request('https://api.cryptonator.com/api/ticker/btc-usd', function(error, response, body) {
+                            const data = JSON.parse(body)
+                            var pr  = parseFloat(data.ticker.price)
+                            var am  = parseFloat(invoices.amountf)
+                            var summ  = pr*am
+                            log(summ.toFixed(2))
+
+
+                           Tranz_info.updateMany({
                                 _id: c._id
                             }, {
                                 $set: {
@@ -97,12 +102,12 @@ const publictime = new CronJob('*/1 * * * *', () => {
                             }, function(err, res) {})
 
                             AdminArray.forEach(a=>{
-                            bot.sendMessage(a, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${c.Amount}$.`, {
+                            bot.sendMessage(a, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${summ.toFixed(2)}$.`, {
                                 parse_mode: 'html',
                             })
                             })
 
-                            bot.sendMessage(c.telegramId, `Ваш баланс пополнен на ${c.Amount}$. Приятного пользования 😊)`, {
+                            bot.sendMessage(c.telegramId, `Ваш баланс пополнен на ${summ.toFixed(2)}$. Приятного пользования 😊)`, {
                                 parse_mode: 'html',
                             })
                             User.findOne({
@@ -113,26 +118,69 @@ const publictime = new CronJob('*/1 * * * *', () => {
                                         telegramId: c.telegramId
                                     }, {
                                         $set: {
-                                            Balance: user.Balance + c.Amount,
+                                            Balance: user.Balance + summ.toFixed(2),
 
                                         }
                                     }, function(err, res) {})
                                 }
                             })
-                        }
-                        if (invoice && invoice.status === 'expired') {
-                            Tranz_info.deleteOne(({
-                                _id: c._id
-                            }), function(err, result) {})
-                        }
-                    })
-                    .catch(err => console.log('err'))
+                        })
+
+
+                    }
+                                    log(invoices)
+                                }).catch();
+                }
+
+                // client.get_invoice(c.InvoiceId)
+                //     .then(invoice => {
+                //         // log(invoice.status)
+                //         if (invoice && invoice.status === 'confirmed' || invoice.status === 'complete' || invoice.status === 'paid') {
+                //             Tranz_info.updateMany({
+                //                 _id: c._id
+                //             }, {
+                //                 $set: {
+                //                     Active: false,
+                //                 }
+                //             }, function(err, res) {})
+
+                //             AdminArray.forEach(a=>{
+                //             bot.sendMessage(a, `<a href="tg://user?id=${chatId}">${c.Name}</a> пополнил свой баланс на ${c.Amount}$.`, {
+                //                 parse_mode: 'html',
+                //             })
+                //             })
+
+                //             bot.sendMessage(c.telegramId, `Ваш баланс пополнен на ${c.Amount}$. Приятного пользования 😊)`, {
+                //                 parse_mode: 'html',
+                //             })
+                //             User.findOne({
+                //                 telegramId: c.telegramId
+                //             }).then(user => {
+                //                 if (user) {
+                //                     User.updateMany({
+                //                         telegramId: c.telegramId
+                //                     }, {
+                //                         $set: {
+                //                             Balance: user.Balance + c.Amount,
+
+                //                         }
+                //                     }, function(err, res) {})
+                //                 }
+                //             })
+                //         }
+                //         if (invoice && invoice.status === 'expired') {
+                //             Tranz_info.deleteOne(({
+                //                 _id: c._id
+                //             }), function(err, result) {})
+                //         }
+                //     })
+                //     .catch(err => console.log('err'))
             })
         }
     })
 })
 publictime.start();
-
+// 
 const publictimeqiwi = new CronJob('*/1 * * * *', () => {
     Wallet.getOperationHistory({
         rows: 5,
@@ -203,7 +251,7 @@ const publictimeqiwi = new CronJob('*/1 * * * *', () => {
     })
 
 })
-publictimeqiwi.start();
+// publictimeqiwi.start();
 
 bot.onText(/\/start (.+)/, (msg, [source, match]) => {
     velcomeText(msg)
@@ -541,18 +589,16 @@ bot.on('message', msg => {
                                     Way: ''
                                 }
                             }, function(err, res) {})
-
-                            client.create_invoice({
-                                    price: parseFloat(msg.text),
-                                    currency: 'USD'
+                            clientcoinpayments.createTransaction({
+                                    'currency1' : 'USD', 'currency2' : 'BTC', 'amount' : parseFloat(msg.text).toFixed(3),'buyer_email':'full_voice_bot@gmail.com'
                                 })
                                 .then(invoice => {
                                     new Tranz_info({
                                         Name: msg.from.first_name,
                                         telegramId: chatId,
                                         Active: true,
-                                        url: invoice.url,
-                                        InvoiceId: invoice.id,
+                                        url: invoice.checkout_url,
+                                        InvoiceId: invoice.txn_id,
                                         Amount: parseFloat(msg.text).toFixed(3)
                                     }).save().then(newstate => {
                                         if (newstate) {
@@ -564,7 +610,34 @@ bot.on('message', msg => {
                                                 }
                                             }, function(err, res) {})
                                         }
-                                    })
+                                }).catch();
+
+
+
+
+                            // client.create_invoice({
+                            //         price: parseFloat(msg.text),
+                            //         currency: 'USD'
+                            //     })
+                            //     .then(invoice => {
+                            //         new Tranz_info({
+                            //             Name: msg.from.first_name,
+                            //             telegramId: chatId,
+                            //             Active: true,
+                            //             url: invoice.url,
+                            //             InvoiceId: invoice.id,
+                            //             Amount: parseFloat(msg.text).toFixed(3)
+                            //         }).save().then(newstate => {
+                            //             if (newstate) {
+                            //                 Tranz_info.updateMany({
+                            //                     _id: newstate._id
+                            //                 }, {
+                            //                     $set: {
+                            //                         id: newstate._id
+                            //                     }
+                            //                 }, function(err, res) {})
+                            //             }
+                            //         })
 
 
                                     bot.sendMessage(chatId, `Хорошо, почти готово! Теперь генерирую счет ..`, {
@@ -581,7 +654,7 @@ bot.on('message', msg => {
 <i>- После оплаты и подтверждения, бот автоматически пришлет уведомление.</i>`, {
                                             parse_mode: 'html',
                                             reply_markup: {
-                                                inline_keyboard: ib.getInlineLinkRefillBalance(invoice.url)
+                                                inline_keyboard: ib.getInlineLinkRefillBalance(invoice.checkout_url)
                                             }
                                         })
                                     })
