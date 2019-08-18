@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "btcpay": "^0.2.3",
+    "coinpayments": "^2.0.3",
     "cron": "^1.6.0",
     "fs": "0.0.1-security",
     "mongoose": "^5.3.11",
