@@ -261,7 +261,7 @@ const publictimeqiwi = new CronJob('*/1 * * * *', () => {
     })
 
 })
-// publictimeqiwi.start();
+ publictimeqiwi.start();
 
 bot.onText(/\/start (.+)/, (msg, [source, match]) => {
     velcomeText(msg)
