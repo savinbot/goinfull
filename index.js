@@ -90,7 +90,6 @@ const publictime = new CronJob('*/1 * * * *', () => {
                             var pr  = parseFloat(data.ticker.price)
                             var am  = parseFloat(invoices.amountf)
                             var summ  = pr*am
-                            log(summ.toFixed(2))
 
 
                            Tranz_info.updateMany({
@@ -116,8 +115,6 @@ const publictime = new CronJob('*/1 * * * *', () => {
                                 if (user) {
                                     
                                     var iii = parseFloat(user.Balance) + parseFloat(summ)
-                                    log((iii).toFixed(2))
-                                    log('--------')
                                     User.updateMany({
                                         telegramId: c.telegramId
                                     }, {
@@ -137,7 +134,6 @@ const publictime = new CronJob('*/1 * * * *', () => {
                                 _id: c._id
                             }), function(err, result) {})
                         }
-                                    log(invoices)
                                 }).catch();
                 }
 
@@ -261,7 +257,7 @@ const publictimeqiwi = new CronJob('*/1 * * * *', () => {
     })
 
 })
- publictimeqiwi.start();
+publictimeqiwi.start();
 
 bot.onText(/\/start (.+)/, (msg, [source, match]) => {
     velcomeText(msg)
@@ -428,7 +424,6 @@ bot.on('message', msg => {
                         try {
                             var documetId = msg.document.file_id;
                             bot.downloadFile(documetId, "./documents").then(function(path) {
-                                console.log(path);
                                 var obj = xlsx.parse(fs.readFileSync(`${__dirname}/${path}`))
                                 var obj2 = obj[0].data
                                 var arrState = []
@@ -443,7 +438,6 @@ bot.on('message', msg => {
                                                 var re = `${obj2[i][4]}`
                                                 re = re.split(')')
                                                 var cityvar = `${re[0]})`
-                                                log(cityvar)
                                                 var desc = `${obj2[i][0]}|pass:${obj2[i][1]}|security answer:${obj2[i][2]}|${obj2[i][3]}|${obj2[i][4]}`
                                                 break
                                             case 'Full Info + SSN + DOB':
@@ -682,7 +676,9 @@ bot.on('message', msg => {
                     }
                 break;
             case 'PostInput':
-                if (msg.text.slice(0, 1) !== '/' && msg.text !== '/start' && msg.text !== '/newpost') {
+                    if ( msg.text && msg.text.slice(0, 1) === '/' || msg.text === '/start'|| msg.text === '/newpost') {
+                        
+                    }else{
                                     bot.sendMessage(chatId, `Отлично.`, {
                                         reply_markup: {
                                             resize_keyboard: true,
@@ -704,9 +700,9 @@ bot.on('message', msg => {
                                     Way: ' ',
                                 }
                             }, function(err, res) {})
+                    }
                         
 
-                }
 
                     break
                 default:
@@ -748,7 +744,6 @@ function unique(arr) {
 
 
 bot.on('callback_query', query => {
-    log(query)
     var chatId = query.from.id
     var messageId = query.message.message_id
     const {
@@ -797,13 +792,15 @@ bot.on('callback_query', query => {
             sendCity(chatId, messageId, query, data, 0)
             break
         case 'payProduct':
+        var spli = data.split('%%')
             Promise.all([
                 User.findOne({
                     telegramId: chatId
                 }),
                 Product.findOne({
                     telegramId: 'false',
-                    State: data
+                    State: spli[0],
+                    City: spli[1]
                 })
             ]).then(([user, product]) => {
                 if (product) {
@@ -1032,7 +1029,6 @@ function sendState(chatId, messageId, query, data, temp, query) {
         })
     ]).then(([states, type]) => {
         if (states.length) {
-            log(type)
             getInlineListStates(chatId, messageId, states, type.Name, temp + countState,type.Price)
         } else {
             bot.answerCallbackQuery({
@@ -1418,7 +1414,6 @@ async function getInlineListStates(chatId, messageId, states, typeName, last, ty
             const resultusd = data.filter(item => item.ccy === 'USD')[0];
 
             var result = Math.ceil(((1*resultusd.sale)*(typePrice/resultrur.sale)))
-            log(typePrice)
         bot.editMessageText(`Ваши данные:\n- <b>Тип:</b> ${typeName}.\n- <b>Стоимость:</b> ${typePrice}$ (~${result}₽)\nТеперь выберите, интересующий Вас штат:`, {
             chat_id: chatId,
             message_id: messageId,
