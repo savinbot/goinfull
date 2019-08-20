@@ -788,79 +788,6 @@ bot.on('callback_query', query => {
             bot.deleteMessage(chatId, messageId)
             break
 
-        case 'SelState':
-            sendCity(chatId, messageId, query, data, 0)
-            break
-        case 'payProduct':
-        var spli = data.split('%%')
-            Promise.all([
-                User.findOne({
-                    telegramId: chatId
-                }),
-                Product.findOne({
-                    telegramId: 'false',
-                    State: spli[0],
-                    City: spli[1]
-                })
-            ]).then(([user, product]) => {
-                if (product) {
-                    Type.findOne({
-                        Name: product.Type
-                    }).then(type => {
-                        if (user.Balance >= type.Price) {
-                            AdminArray.forEach(c=>{
-                            bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${query.from.first_name}</a> совершил покупку товара ${product.Name}.`, {
-                                parse_mode: 'html',
-                                reply_markup: {
-                                    inline_keyboard: ib.getInlineLink()
-                                }
-                            })
-                            })
-                            bot.editMessageText(`➡️ <b>Сделка прошла успешно!</b> Списание средств со счета <b>-${type.Price}$</b>. Ваш баланс: <b>${user.Balance - type.Price}$</b>.\n Хорошего дня!`, {
-                                chat_id: chatId,
-                                message_id: messageId,
-                                parse_mode: 'html',
-                                disable_web_page_preview: true,
-                                reply_markup: {
-                                    inline_keyboard: ib.getInlineLink()
-                                }
-
-                            }).then(function(resp) {}).catch(function(error) {})
-
-                            sendMyPurchases(chatId, [product])
-                            Product.updateMany({
-                                id: product.id
-                            }, {
-                                $set: {
-                                    telegramId: chatId
-                                }
-                            }, function(err, res) {})
-                            User.updateMany({
-                                telegramId: chatId
-                            }, {
-                                $set: {
-                                    Balance: user.Balance - type.Price
-                                }
-                            }, function(err, res) {})
-                        } else {
-                            myBalance(chatId, messageId)
-                            bot.answerCallbackQuery({
-                                callback_query_id: query.id,
-                                show_alert: true,
-                                text: `💤 Недостаточно средств на счету. Пополните счет, перейдя в меню "Мой кабинет"`
-                            })
-                        }
-                    })
-                } else {
-                    bot.deleteMessage(chatId, messageId)
-                    bot.answerCallbackQuery({
-                        callback_query_id: query.id,
-                        show_alert: true,
-                        text: `💤 Произошла ошибка. Данный продукт был продан. Выберите другой`
-                    })
-                }
-            })
-            break
         case 'SelType':
             sendState(chatId, messageId, query, data, 0, query)
             break
@@ -959,14 +886,11 @@ bot.on('callback_query', query => {
             }})
             })
             break
-        case 'backSelCity':
+        case 'bSC':
             sendCity(chatId, messageId, query, data, 0)
             break
         case 'backSelState':
             sendState(chatId, messageId, query, data, 0, query)
-            break
-        case 'SelCity':
-            sendViewProduct(chatId, messageId, query, data)
             break
         case 'backSelType':
             selType(chatId, true, messageId)
@@ -990,8 +914,87 @@ bot.on('callback_query', query => {
             myBalance(chatId, messageId)
             break;
         case 'MyPurchases':
-
             break;
+
+    }
+    switch(type.slice(0,3)){
+        case 'SCi':
+            sendViewProduct(chatId, messageId, query, type.slice(3))
+            break
+        case 'SSt':
+            sendCity(chatId, messageId, query, type.slice(3), 0)
+            break
+        case 'pPr':
+        var spli = type.slice(3).split('@#')
+            Promise.all([
+                User.findOne({
+                    telegramId: chatId
+                }),
+                Product.findOne({
+                    telegramId: 'false',
+                    State: spli[0],
+                    City: spli[1],
+                    Type: spli[2]
+                })
+            ]).then(([user, product]) => {
+                if (product) {
+                    Type.findOne({
+                        Name: product.Type
+                    }).then(type => {
+                        if (user.Balance >= type.Price) {
+                            AdminArray.forEach(c=>{
+                            bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${query.from.first_name}</a> совершил покупку товара ${product.Name}.`, {
+                                parse_mode: 'html',
+                                reply_markup: {
+                                    inline_keyboard: ib.getInlineLink()
+                                }
+                            })
+                            })
+                            bot.editMessageText(`➡️ <b>Сделка прошла успешно!</b> Списание средств со счета <b>-${type.Price}$</b>. Ваш баланс: <b>${user.Balance - type.Price}$</b>.\n Хорошего дня!`, {
+                                chat_id: chatId,
+                                message_id: messageId,
+                                parse_mode: 'html',
+                                disable_web_page_preview: true,
+                                reply_markup: {
+                                    inline_keyboard: ib.getInlineLink()
+                                }
+
+                            }).then(function(resp) {}).catch(function(error) {})
+
+                            sendMyPurchases(chatId, [product])
+                            Product.updateMany({
+                                id: product.id
+                            }, {
+                                $set: {
+                                    telegramId: chatId
+                                }
+                            }, function(err, res) {})
+                            User.updateMany({
+                                telegramId: chatId
+                            }, {
+                                $set: {
+                                    Balance: user.Balance - type.Price
+                                }
+                            }, function(err, res) {})
+                        } else {
+                            myBalance(chatId, messageId)
+                            bot.answerCallbackQuery({
+                                callback_query_id: query.id,
+                                show_alert: true,
+                                text: `💤 Недостаточно средств на счету. Пополните счет, перейдя в меню "Мой кабинет"`
+                            })
+                        }
+                    })
+                } else {
+                    bot.deleteMessage(chatId, messageId)
+                    bot.answerCallbackQuery({
+                        callback_query_id: query.id,
+                        show_alert: true,
+                        text: `💤 Произошла ошибка. Данный продукт был продан. Выберите другой`
+                    })
+                }
+            })
+            break
     }
 
 
@@ -1017,7 +1020,6 @@ function myBalance(chatId, messageId) {
 }
 
 function sendState(chatId, messageId, query, data, temp, query) {
-
     Promise.all([
         State.find({
             Type: data
@@ -1123,19 +1125,23 @@ function selType(chatId, edit, messageId) {
 }
 
 function sendCity(chatId, messageId, query, data, temp) {
+
+    var spli = data.split('@#')
     Promise.all([
         City.find({
-            State: data
+            State: spli[0],
+            Type:spli[1]
         }).skip(temp).limit(countState).sort({
             Name: 1
         }),
         State.findOne({
-            Name: data
+            Name: spli[0],
+            Type:spli[1]
         }),
     ]).then(([citys, state]) => {
         if (citys.length) {
             Type.findOne({
-                Name: state.Type
+                Name: spli[1]
             }).then(type => {
                 getInlineListCitys(chatId, messageId, citys, type.Name, state.Name, temp + countState, query,type.Price)
             })
@@ -1151,11 +1157,17 @@ function sendCity(chatId, messageId, query, data, temp) {
 }
 
 async function getInlineListCitys(chatId, messageId, citys, typeName, stateName, last, query,pricetype) {
-
     const cityNames = citys.map(citys => citys.Name);
+    const typeNames = citys.map(citys => citys.Type);
+    const stateNames = citys.map(citys => citys.State);
+
     const allProducts = await Product.find({
         City: {
             $in: cityNames
+        },State: {
+            $in: stateNames
+        },Type: {
+            $in: typeNames
         },
         telegramId: 'false'
     });
@@ -1176,8 +1188,7 @@ async function getInlineListCitys(chatId, messageId, citys, typeName, stateName,
                     [{
                         text: `${c.Name} | ${count} »`,
                         callback_data: JSON.stringify({
-                            type: 'SelCity',
-                            data: c.Name
+                            type: `SCi${c.Name}@#${c.State}@#${c.Type}`
                         })
                     }],
                 )
@@ -1187,8 +1198,7 @@ async function getInlineListCitys(chatId, messageId, citys, typeName, stateName,
                 arr[i - 1].push({
                     text: `${c.Name} | ${count} »`,
                     callback_data: JSON.stringify({
-                        type: 'SelCity',
-                        data: c.Name,
+                        type: `SCi${c.Name}@#${c.State}@#${c.Type}`
                     })
                 })
             }
@@ -1197,6 +1207,7 @@ async function getInlineListCitys(chatId, messageId, citys, typeName, stateName,
             return 0
         }
     })
+
     if (arr.length) {
         arr.push(
             [{
@@ -1222,17 +1233,17 @@ async function getInlineListCitys(chatId, messageId, citys, typeName, stateName,
                     })
                 }
             ],
+            
         )
         var txt = citys[0].Type === 'Google Voice' ? 'код телефона' : 'Город'
     request('https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5', function (error, response, body) {
         if (error) throw new Error(error)
         if (response.statusCode === 200) {
-            const data = JSON.parse(body);
-            const resultrur = data.filter(item => item.ccy === 'RUR')[0];
-            const resultusd = data.filter(item => item.ccy === 'USD')[0];
+            const datas = JSON.parse(body);
+            const resultrur = datas.filter(item => item.ccy === 'RUR')[0];
+            const resultusd = datas.filter(item => item.ccy === 'USD')[0];
 
             var result = Math.ceil(((1*resultusd.sale)*(pricetype/resultrur.sale)))
-
         bot.editMessageText(`Ваши данные:\n- <b>Тип:</b> ${typeName}.\n- <b>Штат:</b> ${stateName}.\n- <b>Стоимость:</b> ${pricetype}$ (~${result}₽).\nТеперь выберите, интересующий Вас ${txt}:`, {
             chat_id: chatId,
             message_id: messageId,
@@ -1242,7 +1253,7 @@ async function getInlineListCitys(chatId, messageId, citys, typeName, stateName,
                 inline_keyboard: arr
             }
 
-        }).then(function(resp) {}).catch(function(error) {})
+        })
     }})
     } else {
         bot.answerCallbackQuery({
@@ -1257,13 +1268,19 @@ async function getInlineListCitys(chatId, messageId, citys, typeName, stateName,
 
 
 function sendViewProduct(chatId, messageId, query, data) {
+    var spli = data.split('@#')
+        log(spli)
     Product.find({
-        City: data,
+        City: spli[0],
+        State: spli[1],
+        Type: spli[2],
         telegramId: 'false'
     }).then(products => {
 
         Product.findOne({
-            City: data,
+            City: spli[0],
+            State: spli[1],
+            Type: spli[2],
             telegramId: 'false'
         }).then(product => {
             if (product) {
@@ -1277,10 +1294,13 @@ function sendViewProduct(chatId, messageId, query, data) {
 
                 Promise.all([
                     State.findOne({
-                        Name: product.State
+                        Name: product.State,
+                        Type: product.Type
                     }),
                     City.findOne({
-                        Name: product.City
+                        Name: product.City,
+                        Type: product.Type,
+                        State: product.State
                     }),
                     Type.findOne({
                         Name: product.Type
@@ -1338,9 +1358,12 @@ function sendMyPurchases(chatId, products) {
 
 async function getInlineListStates(chatId, messageId, states, typeName, last, typePrice) {
     const statesNames = states.map(state => state.Name);
+    const statesTypes = states.map(state => state.Type);
     const allProducts = await Product.find({
         State: {
             $in: statesNames
+        },Type: {
+            $in: statesTypes
         },
         telegramId: 'false'
     });
@@ -1360,8 +1383,7 @@ async function getInlineListStates(chatId, messageId, states, typeName, last, ty
                     [{
                         text: `${c} | ${count} »`,
                         callback_data: JSON.stringify({
-                            type: 'SelState',
-                            data: c
+                            type: `SSt${c}@#${typeName}`,
                         })
                     }],
                 )
@@ -1371,8 +1393,7 @@ async function getInlineListStates(chatId, messageId, states, typeName, last, ty
                 arr[i - 1].push({
                     text: `${c} | ${count} »`,
                     callback_data: JSON.stringify({
-                        type: 'SelState',
-                        data: c
+                        type: `SSt${c}@#${typeName}`,
                     })
                 })
             }
