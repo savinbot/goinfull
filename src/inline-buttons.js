@@ -101,7 +101,7 @@ module.exports = {
                 text: `💎 Купить 1шт. - ${price}$ (~${priceRub}₽) »`,
                 callback_data: JSON.stringify({
                     type: 'payProduct',
-                    data: product.State,
+                    data: `${product.State}%%${product.City}`,
                 })
             }],[{
                 text: '« Назад',
