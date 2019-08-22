@@ -51,30 +51,13 @@ mongoose.connect(config.DB_URL, {
 
 
 
-
-
-
-
-const options = {key: `1161485cc5c3e2748bccc8821520c70890d9e5cbc88777b4c9633cf2f58933b3`,
-      secret: `dc60786E2De91d87A868aFFbC5FaDbe3a0ce6665c407721452358FE30a860D01`,}
+const options = {
+    key: `1161485cc5c3e2748bccc8821520c70890d9e5cbc88777b4c9633cf2f58933b3`,
+    secret: `dc60786E2De91d87A868aFFbC5FaDbe3a0ce6665c407721452358FE30a860D01`,
+}
 
 const Coinpayments = require("coinpayments");
 const clientcoinpayments = new Coinpayments(options);
-
-                            // clientcoinpayments.createTransaction({
-                            //         'currency1' : 'USD', 'currency2' : 'BTC', 'amount' : '1','buyer_email':'dsfsdfg@fgdf.com'
-                            //     })
-                            //     .then(invoice => {
-                            //         log(invoice)
-                            //     }).catch();
-
-// clientcoinpayments.getTxList ().then(invoice => {
-//                                     log(invoice)
-// clientcoinpayments.getTxMulti(invoice).then(invoices => {
-//                                     log(invoices)
-//                                 }).catch();
-
-//                                 }).catch();
 
 const publictime = new CronJob('*/1 * * * *', () => {
     Tranz_info.find({
@@ -83,58 +66,60 @@ const publictime = new CronJob('*/1 * * * *', () => {
         if (tranz_info.length) {
             tranz_info.forEach(c => {
                 if (c.InvoiceId) {
-                clientcoinpayments.getTx({txid :c.InvoiceId}).then(invoices => {
-                    if (invoices && invoices.status === 100 || invoices && invoices.status_text === 'Waiting for confirms...') {
-                        request('https://api.cryptonator.com/api/ticker/btc-usd', function(error, response, body) {
-                            const data = JSON.parse(body)
-                            var pr  = parseFloat(data.ticker.price)
-                            var am  = parseFloat(invoices.amountf)
-                            var summ  = pr*am
+                    clientcoinpayments.getTx({
+                        txid: c.InvoiceId
+                    }).then(invoices => {
+                        if (invoices && invoices.status === 100 || invoices && invoices.status_text === 'Waiting for confirms...') {
+                            request('https://api.cryptonator.com/api/ticker/btc-usd', function(error, response, body) {
+                                const data = JSON.parse(body)
+                                var pr = parseFloat(data.ticker.price)
+                                var am = parseFloat(invoices.amountf)
+                                var summ = pr * am
 
 
-                           Tranz_info.updateMany({
-                                _id: c._id
-                            }, {
-                                $set: {
-                                    Active: false,
-                                }
-                            }, function(err, res) {})
+                                Tranz_info.updateMany({
+                                    _id: c._id
+                                }, {
+                                    $set: {
+                                        Active: false,
+                                    }
+                                }, function(err, res) {})
 
-                            AdminArray.forEach(a=>{
-                            bot.sendMessage(a, `<a href="tg://user?id=${c.telegramId}">${c.Name}</a> пополнил свой баланс на ${summ.toFixed(2)}$.`, {
-                                parse_mode: 'html',
+                                AdminArray.forEach(a => {
+                                    bot.sendMessage(a, `<a href="tg://user?id=${c.telegramId}">${c.Name}</a> пополнил свой баланс на ${summ.toFixed(2)}$.`, {
+                                        parse_mode: 'html',
+                                    })
+                                })
+
+                                bot.sendMessage(c.telegramId, `Ваш баланс пополнен на ${summ.toFixed(2)}$. Приятного пользования 😊)`, {
+                                    parse_mode: 'html',
+                                })
+                                User.findOne({
+                                    telegramId: c.telegramId
+                                }).then(user => {
+                                    if (user) {
+
+                                        var iii = parseFloat(user.Balance) + parseFloat(summ)
+                                        User.updateMany({
+                                            telegramId: c.telegramId
+                                        }, {
+                                            $set: {
+                                                Balance: (iii).toFixed(2),
+
+                                            }
+                                        }, function(err, res) {})
+                                    }
+                                })
                             })
-                            })
-
-                            bot.sendMessage(c.telegramId, `Ваш баланс пополнен на ${summ.toFixed(2)}$. Приятного пользования 😊)`, {
-                                parse_mode: 'html',
-                            })
-                            User.findOne({
-                                telegramId: c.telegramId
-                            }).then(user => {
-                                if (user) {
-                                    
-                                    var iii = parseFloat(user.Balance) + parseFloat(summ)
-                                    User.updateMany({
-                                        telegramId: c.telegramId
-                                    }, {
-                                        $set: {
-                                            Balance: (iii).toFixed(2),
-
-                                        }
-                                    }, function(err, res) {})
-                                }
-                            })
-                        })
 
 
-                    }
+                        }
                         if (invoices && invoices.status === -100) {
                             Tranz_info.deleteOne(({
                                 _id: c._id
                             }), function(err, result) {})
                         }
-                                }).catch();
+                    }).catch();
                 }
 
 
@@ -200,58 +185,62 @@ const publictimeqiwi = new CronJob('*/1 * * * *', () => {
                 }).then(tranz_info => {
                     if (tranz_info && c.total.currency === 643) {
 
-    request('https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5', function (error, response, body) {
-        if (error) throw new Error(error)
-        if (response.statusCode === 200) {
-            const data = JSON.parse(body);
-            const resultrur = data.filter(item => item.ccy === 'RUR')[0];
-            const resultusd = data.filter(item => item.ccy === 'USD')[0];
+                        request('https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5', function(error, response, body) {
+                            if (error) throw new Error(error)
+                            if (response.statusCode === 200) {
+                                const data = JSON.parse(body);
+                                const resultrur = data.filter(item => item.ccy === 'RUR')[0];
+                                const resultusd = data.filter(item => item.ccy === 'USD')[0];
 
-            var result = (1*resultusd.sale)*(1/resultrur.sale)
+                                var result = (1 * resultusd.sale) * (1 / resultrur.sale)
 
-                        var chatId = tranz_info.telegramId
-                        User.findOne({telegramId:chatId}).then(user=>{
-                            var bal = user.Balance
-                            var am = c.total.amount/result
-                            var resul = (bal+am).toFixed(2)
-
-                            AdminArray.forEach(a=>{
-                            bot.sendMessage(a, `<a href="tg://user?id=${chatId}">${tranz_info.Name}</a> пополнил свой баланс на ${am.toFixed(2)}$ (${c.total.amount}₽) через систему Qiwi.`, {
-                                parse_mode: 'html',
-                            })
-                            })
-
-
-                            bot.sendMessage(chatId, `Ваш баланс пополнен на ${am.toFixed(2)}$ (${c.total.amount}₽). Приятного пользования 😊)`, {
-                                parse_mode: 'html',
-                            })
-
-
-                                User.updateMany({
+                                var chatId = tranz_info.telegramId
+                                User.findOne({
                                     telegramId: chatId
-                                }, {
-                                    $set: {
-                                        Balance: resul,
-                                    }
-                                }, function(err, res) {})
+                                }).then(user => {
+                                    var bal = user.Balance
+                                    var am = c.total.amount / result
+                                    var resul = (bal + am).toFixed(2)
 
-                                Tranz_info.updateMany({
-                                    id: c.comment
-                                }, {
-                                    $set: {
-                                        Active: false
-                                    }
-                                }, function(err, res) {})
-                        })}})
+                                    AdminArray.forEach(a => {
+                                        bot.sendMessage(a, `<a href="tg://user?id=${chatId}">${tranz_info.Name}</a> пополнил свой баланс на ${am.toFixed(2)}$ (${c.total.amount}₽) через систему Qiwi.`, {
+                                            parse_mode: 'html',
+                                        })
+                                    })
 
 
+                                    bot.sendMessage(chatId, `Ваш баланс пополнен на ${am.toFixed(2)}$ (${c.total.amount}₽). Приятного пользования 😊)`, {
+                                        parse_mode: 'html',
+                                    })
+
+
+                                    User.updateMany({
+                                        telegramId: chatId
+                                    }, {
+                                        $set: {
+                                            Balance: resul,
+                                        }
+                                    }, function(err, res) {})
+
+                                    Tranz_info.updateMany({
+                                        id: c.comment
+                                    }, {
+                                        $set: {
+                                            Active: false
+                                        }
+                                    }, function(err, res) {})
+                                })
                             }
+                        })
+
+
+                    }
 
 
 
-                        }).catch(function(error) {}) 
-                    
-                
+                }).catch(function(error) {})
+
+
             }
         })
     })
@@ -266,7 +255,6 @@ bot.onText(/\/start (.+)/, (msg, [source, match]) => {
 
 bot.onText(/\/start/, msg => {
     velcomeText(msg)
-    
 })
 
 
@@ -277,27 +265,25 @@ bot.onText(/\/newpost/, msg => {
             newPost(chatId)
         }
     })
-
-
-
 })
+
 function newPost(chatId) {
-            User.updateMany({
-                telegramId: chatId
-            }, {
-                $set: {
-                    Way: 'PostInput',
-                }
-            }, function(err, res) {})
+    User.updateMany({
+        telegramId: chatId
+    }, {
+        $set: {
+            Way: 'PostInput',
+        }
+    }, function(err, res) {})
 
 
-            bot.sendMessage(chatId, `Отправьте, или перешлите боту, что вы хотите разослать подписчикам, либо вызовите команду /stop:`, {
-                parse_mode: 'html',
-                reply_markup: {
-                    remove_keyboard: true,
-                }
+    bot.sendMessage(chatId, `Отправьте, или перешлите боту, что вы хотите разослать подписчикам, либо вызовите команду /stop:`, {
+        parse_mode: 'html',
+        reply_markup: {
+            remove_keyboard: true,
+        }
 
-            })
+    })
 }
 
 bot.onText(/\/stop/, msg => {
@@ -318,15 +304,13 @@ bot.onText(/\/stop/, msg => {
 
         }
     }, function(err, res) {})
-
-
 })
 
 bot.onText(/\/newpricefullinfo/, msg => {
     var chatId = msg.chat.id
     AdminArray.forEach(c => {
         if (c === chatId) {
-            bot.sendMessage(chatId, 'Напишите новую цену, для товаров типа Full Info:', {
+            bot.sendMessage(chatId, 'Напишите новую цену, для товаров типа Full Info + SSN + DOB:', {
                 parse_mode: 'html',
                 reply_markup: {
                     remove_keyboard: true,
@@ -338,6 +322,164 @@ bot.onText(/\/newpricefullinfo/, msg => {
                 $set: {
                     Way: 'editPrice',
                     TempData: 'Full Info + SSN + DOB'
+
+                }
+            }, function(err, res) {})
+
+        }
+    })
+})
+
+bot.onText(/\/newpricefullinfocs600/, msg => {
+    var chatId = msg.chat.id
+    AdminArray.forEach(c => {
+        if (c === chatId) {
+            bot.sendMessage(chatId, 'Напишите новую цену, для товаров типа Full Info + SSN + DOB + CS(600-700):', {
+                parse_mode: 'html',
+                reply_markup: {
+                    remove_keyboard: true,
+                }
+            })
+            User.updateMany({
+                telegramId: chatId
+            }, {
+                $set: {
+                    Way: 'editPrice',
+                    TempData: 'Full Info + SSN + DOB + CS(600-700)'
+
+                }
+            }, function(err, res) {})
+
+        }
+    })
+})
+
+bot.onText(/\/newpricefullinfocs700/, msg => {
+    var chatId = msg.chat.id
+    AdminArray.forEach(c => {
+        if (c === chatId) {
+            bot.sendMessage(chatId, 'Напишите новую цену, для товаров типа Full Info + SSN + DOB + CS(700-800):', {
+                parse_mode: 'html',
+                reply_markup: {
+                    remove_keyboard: true,
+                }
+            })
+            User.updateMany({
+                telegramId: chatId
+            }, {
+                $set: {
+                    Way: 'editPrice',
+                    TempData: 'Full Info + SSN + DOB + CS(700-800)'
+
+                }
+            }, function(err, res) {})
+
+        }
+    })
+})
+
+bot.onText(/\/newpricefullinfocs800/, msg => {
+    var chatId = msg.chat.id
+    AdminArray.forEach(c => {
+        if (c === chatId) {
+            bot.sendMessage(chatId, 'Напишите новую цену, для товаров типа Full Info + SSN + DOB + CS(800+):', {
+                parse_mode: 'html',
+                reply_markup: {
+                    remove_keyboard: true,
+                }
+            })
+            User.updateMany({
+                telegramId: chatId
+            }, {
+                $set: {
+                    Way: 'editPrice',
+                    TempData: 'Full Info + SSN + DOB + CS(800+)'
+
+                }
+            }, function(err, res) {})
+
+        }
+    })
+})
+
+bot.onText(/\/newpricegooglevoice/, msg => {
+    var chatId = msg.chat.id
+    AdminArray.forEach(c => {
+        if (c === chatId) {
+            bot.sendMessage(chatId, 'Напишите новую цену, для товаров типа Google Voice:', {
+                parse_mode: 'html',
+                reply_markup: {
+                    remove_keyboard: true,
+                }
+            })
+            User.updateMany({
+                telegramId: chatId
+            }, {
+                $set: {
+                    Way: 'editPrice',
+                    TempData: 'Google Voice'
+
+                }
+            }, function(err, res) {})
+        }
+    })
+})
+
+bot.onText(/\/newfullinfocs600/, msg => {
+    var chatId = msg.chat.id
+    AdminArray.forEach(c => {
+        if (c === chatId) {
+            bot.sendMessage(chatId, 'Для добавление товаров типа Full Info + SSN + DOB + CS(600-700), пришлите боту документ, формата .xlsx', {
+                parse_mode: 'html',
+            })
+            User.updateMany({
+                telegramId: chatId
+            }, {
+                $set: {
+                    Way: 'addDocument',
+                    TempData: 'Full Info + SSN + DOB + CS(600-700)'
+
+                }
+            }, function(err, res) {})
+
+        }
+    })
+})
+
+bot.onText(/\/newfullinfocs700/, msg => {
+    var chatId = msg.chat.id
+    AdminArray.forEach(c => {
+        if (c === chatId) {
+            bot.sendMessage(chatId, 'Для добавление товаров типа Full Info + SSN + DOB + CS(700-800), пришлите боту документ, формата .xlsx', {
+                parse_mode: 'html',
+            })
+            User.updateMany({
+                telegramId: chatId
+            }, {
+                $set: {
+                    Way: 'addDocument',
+                    TempData: 'Full Info + SSN + DOB + CS(700-800)'
+
+                }
+            }, function(err, res) {})
+
+        }
+    })
+})
+
+bot.onText(/\/newfullinfocs800/, msg => {
+    var chatId = msg.chat.id
+    AdminArray.forEach(c => {
+        if (c === chatId) {
+            bot.sendMessage(chatId, 'Для добавление товаров типа Full Info + SSN + DOB + CS(800+), пришлите боту документ, формата .xlsx', {
+                parse_mode: 'html',
+            })
+            User.updateMany({
+                telegramId: chatId
+            }, {
+                $set: {
+                    Way: 'addDocument',
+                    TempData: 'Full Info + SSN + DOB + CS(800+)'
 
                 }
             }, function(err, res) {})
@@ -387,33 +529,26 @@ bot.onText(/\/newgooglevoice/, msg => {
     })
 })
 
-bot.onText(/\/newpricegooglevoice/, msg => {
-    var chatId = msg.chat.id
-    AdminArray.forEach(c => {
-        if (c === chatId) {
-            bot.sendMessage(chatId, 'Напишите новую цену, для товаров типа Google Voice:', {
-                parse_mode: 'html',
-                reply_markup: {
-                    remove_keyboard: true,
-                }
-            })
-            User.updateMany({
-                telegramId: chatId
-            }, {
-                $set: {
-                    Way: 'editPrice',
-                    TempData: 'Google Voice'
-
-                }
-            }, function(err, res) {})
-        }
-    })
-})
 
 
 
 bot.on('message', msg => {
     var chatId = msg.chat.id
+    // new Type({
+    //     Name: 'Full Info + SSN + DOB + CS(800+)',
+    //     Sort: 'd',
+    //     Price: 10,
+    // }).save().then(newtranzinfo => {
+    //     if (newtranzinfo) {
+    //         Type.updateMany({
+    //             _id: newtranzinfo._id
+    //         }, {
+    //             $set: {
+    //                 id: newtranzinfo._id
+    //             }
+    //         }, function(err, res) {})
+    //     }})
+
     User.findOne({
         telegramId: chatId,
     }).then(user => {
@@ -444,6 +579,21 @@ bot.on('message', msg => {
                                                 var statevar = `${obj2[i][3]}`
                                                 var cityvar = `${obj2[i][2]}`
                                                 var desc = `${obj2[i][0]}|${obj2[i][1]}|${obj2[i][2]}|${obj2[i][3]}|${obj2[i][4]}|${obj2[i][5]}|${obj2[i][6]}-${obj2[i][7]}-${obj2[i][8]}`
+                                                break
+                                            case 'Full Info + SSN + DOB + CS(600-700)':
+                                                var statevar = `${obj2[i][3]}`
+                                                var cityvar = `${obj2[i][2]}`
+                                                var desc = `${obj2[i][0]}|${obj2[i][1]}|${obj2[i][2]}|${obj2[i][3]}|${obj2[i][4]}|${obj2[i][5]}|${obj2[i][6]}-${obj2[i][7]}-${obj2[i][8]}|${obj2[i][9]}`
+                                                break
+                                            case 'Full Info + SSN + DOB + CS(700-800)':
+                                                var statevar = `${obj2[i][3]}`
+                                                var cityvar = `${obj2[i][2]}`
+                                                var desc = `${obj2[i][0]}|${obj2[i][1]}|${obj2[i][2]}|${obj2[i][3]}|${obj2[i][4]}|${obj2[i][5]}|${obj2[i][6]}-${obj2[i][7]}-${obj2[i][8]}|${obj2[i][9]}`
+                                                break
+                                            case 'Full Info + SSN + DOB + CS(800+)':
+                                                var statevar = `${obj2[i][3]}`
+                                                var cityvar = `${obj2[i][2]}`
+                                                var desc = `${obj2[i][0]}|${obj2[i][1]}|${obj2[i][2]}|${obj2[i][3]}|${obj2[i][4]}|${obj2[i][5]}|${obj2[i][6]}-${obj2[i][7]}-${obj2[i][8]}|${obj2[i][9]}`
                                                 break
                                         }
                                         arrState.push(statevar)
@@ -594,7 +744,10 @@ bot.on('message', msg => {
                                 }
                             }, function(err, res) {})
                             clientcoinpayments.createTransaction({
-                                    'currency1' : 'USD', 'currency2' : 'BTC', 'amount' : parseFloat(msg.text).toFixed(3),'buyer_email':'full_voice_bot@gmail.com'
+                                    'currency1': 'USD',
+                                    'currency2': 'BTC',
+                                    'amount': parseFloat(msg.text).toFixed(3),
+                                    'buyer_email': 'full_voice_bot@gmail.com'
                                 })
                                 .then(invoice => {
                                     new Tranz_info({
@@ -614,34 +767,34 @@ bot.on('message', msg => {
                                                 }
                                             }, function(err, res) {})
                                         }
-                                }).catch();
+                                    }).catch();
 
 
 
 
-                            // client.create_invoice({
-                            //         price: parseFloat(msg.text),
-                            //         currency: 'USD'
-                            //     })
-                            //     .then(invoice => {
-                            //         new Tranz_info({
-                            //             Name: msg.from.first_name,
-                            //             telegramId: chatId,
-                            //             Active: true,
-                            //             url: invoice.url,
-                            //             InvoiceId: invoice.id,
-                            //             Amount: parseFloat(msg.text).toFixed(3)
-                            //         }).save().then(newstate => {
-                            //             if (newstate) {
-                            //                 Tranz_info.updateMany({
-                            //                     _id: newstate._id
-                            //                 }, {
-                            //                     $set: {
-                            //                         id: newstate._id
-                            //                     }
-                            //                 }, function(err, res) {})
-                            //             }
-                            //         })
+                                    // client.create_invoice({
+                                    //         price: parseFloat(msg.text),
+                                    //         currency: 'USD'
+                                    //     })
+                                    //     .then(invoice => {
+                                    //         new Tranz_info({
+                                    //             Name: msg.from.first_name,
+                                    //             telegramId: chatId,
+                                    //             Active: true,
+                                    //             url: invoice.url,
+                                    //             InvoiceId: invoice.id,
+                                    //             Amount: parseFloat(msg.text).toFixed(3)
+                                    //         }).save().then(newstate => {
+                                    //             if (newstate) {
+                                    //                 Tranz_info.updateMany({
+                                    //                     _id: newstate._id
+                                    //                 }, {
+                                    //                     $set: {
+                                    //                         id: newstate._id
+                                    //                     }
+                                    //                 }, function(err, res) {})
+                                    //             }
+                                    //         })
 
 
                                     bot.sendMessage(chatId, `Хорошо, почти готово! Теперь генерирую счет ..`, {
@@ -674,34 +827,34 @@ bot.on('message', msg => {
                             }
                         })
                     }
-                break;
-            case 'PostInput':
-                    if ( msg.text && msg.text.slice(0, 1) === '/' || msg.text === '/start'|| msg.text === '/newpost') {
-                        
-                    }else{
-                                    bot.sendMessage(chatId, `Отлично.`, {
-                                        reply_markup: {
-                                            resize_keyboard: true,
-                                            keyboard: keyboard.Home
-                                        }
-                                    })                    
-                                        bot.sendMessage(chatId, `Выберите Категорию, которой делать рассылку:`, {
-                                            parse_mode: 'html',
-                                            reply_to_message_id: msg.message_id,
-                                            reply_markup: {
-                                                inline_keyboard: ib.getInlineListForPost(msg.message_id)
-                                            }
-                                        })
+                    break;
+                case 'PostInput':
+                    if (msg.text && msg.text.slice(0, 1) === '/' || msg.text === '/start' || msg.text === '/newpost') {
 
-                            User.updateMany({
-                                telegramId: chatId
-                            }, {
-                                $set: {
-                                    Way: ' ',
-                                }
-                            }, function(err, res) {})
+                    } else {
+                        bot.sendMessage(chatId, `Отлично.`, {
+                            reply_markup: {
+                                resize_keyboard: true,
+                                keyboard: keyboard.Home
+                            }
+                        })
+                        bot.sendMessage(chatId, `Выберите Категорию, которой делать рассылку:`, {
+                            parse_mode: 'html',
+                            reply_to_message_id: msg.message_id,
+                            reply_markup: {
+                                inline_keyboard: ib.getInlineListForPost(msg.message_id)
+                            }
+                        })
+
+                        User.updateMany({
+                            telegramId: chatId
+                        }, {
+                            $set: {
+                                Way: ' ',
+                            }
+                        }, function(err, res) {})
                     }
-                        
+
 
 
                     break
@@ -759,7 +912,7 @@ bot.on('callback_query', query => {
                 text: `✔️ Ваше сообщение отправлено всем подписчикам.`,
                 show_alert: true
             })
-            User.find({}).then(users=>{
+            User.find({}).then(users => {
                 if (users.length) {
                     users.forEach(c => {
                         bot.forwardMessage(c.telegramId, chatId, data)
@@ -774,12 +927,12 @@ bot.on('callback_query', query => {
                 text: `✔️ Ваше сообщение отправлено подписчикам, у которых баланс 0$.`,
                 show_alert: true
             })
-            User.find({}).then(users=>{
+            User.find({}).then(users => {
                 users.forEach(c => {
-                        if (c.Balance === 0) {
-                            bot.forwardMessage(c.telegramId, chatId, data)
-                        } 
-                    
+                    if (c.Balance === 0) {
+                        bot.forwardMessage(c.telegramId, chatId, data)
+                    }
+
                 })
             })
             break
@@ -824,40 +977,57 @@ bot.on('callback_query', query => {
             getInlineMyOffice(chatId, true, messageId)
             break
         case 'RefillBalanceQiwi':
-            Tranz_info.findOne({telegramId:chatId,Active:true}).then(tranz_info=>{
-    request('https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5', function (error, response, body) {
-        if (error) throw new Error(error)
-        if (response.statusCode === 200) {
-            const data = JSON.parse(body);
-            const resultrur = data.filter(item => item.ccy === 'RUR')[0];
-            const resultusd = data.filter(item => item.ccy === 'USD')[0];
+            Tranz_info.findOne({
+                telegramId: chatId,
+                Active: true
+            }).then(tranz_info => {
+                request('https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5', function(error, response, body) {
+                    if (error) throw new Error(error)
+                    if (response.statusCode === 200) {
+                        const data = JSON.parse(body);
+                        const resultrur = data.filter(item => item.ccy === 'RUR')[0];
+                        const resultusd = data.filter(item => item.ccy === 'USD')[0];
 
-            var result = Math.ceil(((1*resultusd.sale)*(1/resultrur.sale)))
+                        var result = Math.ceil(((1 * resultusd.sale) * (1 / resultrur.sale)))
 
 
-                var text = `📈 Курс Qiwi ➖ 1$ = <b>${result}₽.</b>
+                        var text = `📈 Курс Qiwi ➖ 1$ = <b>${result}₽.</b>
 
 📲 Для пополнения нажмите кнопку ниже.
 
 📝 Пополните счет на любою сумму, не изменяя комментарий, и дождитесь оповещения от бота. \n<b>Внимание:</b> ссылка для оплаты одноразовая, для повторной оплаты сгенерируйте заново ссылку.`
-                if (!tranz_info) {
-                                    new Tranz_info({
-                                        Name: query.from.first_name,
-                                        telegramId: chatId,
-                                        Active: true,
-                                    }).save().then(newtranzinfo => {
-                                        if (newtranzinfo) {
-                                            Tranz_info.updateMany({
-                                                _id: newtranzinfo._id
-                                            }, {
-                                                $set: {
-                                                    id: newtranzinfo._id
-                                                }
-                                            }, function(err, res) {})
+                        if (!tranz_info) {
+                            new Tranz_info({
+                                Name: query.from.first_name,
+                                telegramId: chatId,
+                                Active: true,
+                            }).save().then(newtranzinfo => {
+                                if (newtranzinfo) {
+                                    Tranz_info.updateMany({
+                                        _id: newtranzinfo._id
+                                    }, {
+                                        $set: {
+                                            id: newtranzinfo._id
                                         }
-                                                    
-                                    var qiwiurl = `https://w.qiwi.com/payment/form/99?currency=643&amountFraction=0&extra[%27account%27]=${config.QIWIPORTMONEY}&extra[%27comment%27]=${newtranzinfo._id}`
-                
+                                    }, function(err, res) {})
+                                }
+
+                                var qiwiurl = `https://w.qiwi.com/payment/form/99?currency=643&amountFraction=0&extra[%27account%27]=${config.QIWIPORTMONEY}&extra[%27comment%27]=${newtranzinfo._id}`
+
+                                bot.editMessageText(text, {
+                                    chat_id: chatId,
+                                    message_id: messageId,
+                                    parse_mode: 'html',
+                                    disable_web_page_preview: true,
+                                    reply_markup: {
+                                        inline_keyboard: ib.getInlineLinkRefillBalance(qiwiurl)
+                                    }
+
+                                }).then(function(resp) {}).catch(function(error) {})
+                            })
+                        } else {
+
+                            var qiwiurl = `https://w.qiwi.com/payment/form/99?currency=643&amountFraction=0&extra[%27account%27]=${config.QIWIPORTMONEY}&extra[%27comment%27]=${tranz_info._id}`
                             bot.editMessageText(text, {
                                 chat_id: chatId,
                                 message_id: messageId,
@@ -868,22 +1038,9 @@ bot.on('callback_query', query => {
                                 }
 
                             }).then(function(resp) {}).catch(function(error) {})
-            })
-                }else{
-
-                var qiwiurl = `https://w.qiwi.com/payment/form/99?currency=643&amountFraction=0&extra[%27account%27]=${config.QIWIPORTMONEY}&extra[%27comment%27]=${tranz_info._id}`
-                            bot.editMessageText(text, {
-                                chat_id: chatId,
-                                message_id: messageId,
-                                parse_mode: 'html',
-                                disable_web_page_preview: true,
-                                reply_markup: {
-                                    inline_keyboard: ib.getInlineLinkRefillBalance(qiwiurl)
-                                }
-
-                            }).then(function(resp) {}).catch(function(error) {})
-                }
-            }})
+                        }
+                    }
+                })
             })
             break
         case 'bSC':
@@ -917,7 +1074,7 @@ bot.on('callback_query', query => {
             break;
 
     }
-    switch(type.slice(0,3)){
+    switch (type.slice(0, 3)) {
         case 'SCi':
             sendViewProduct(chatId, messageId, query, type.slice(3))
             break
@@ -925,7 +1082,7 @@ bot.on('callback_query', query => {
             sendCity(chatId, messageId, query, type.slice(3), 0)
             break
         case 'pPr':
-        var spli = type.slice(3).split('@#')
+            var spli = type.slice(3).split('@#')
             Promise.all([
                 User.findOne({
                     telegramId: chatId
@@ -942,13 +1099,13 @@ bot.on('callback_query', query => {
                         Name: product.Type
                     }).then(type => {
                         if (user.Balance >= type.Price) {
-                            AdminArray.forEach(c=>{
-                            bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${query.from.first_name}</a> совершил покупку товара ${product.Name}.`, {
-                                parse_mode: 'html',
-                                reply_markup: {
-                                    inline_keyboard: ib.getInlineLink()
-                                }
-                            })
+                            AdminArray.forEach(c => {
+                                bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${query.from.first_name}</a> совершил покупку товара ${product.Name}.`, {
+                                    parse_mode: 'html',
+                                    reply_markup: {
+                                        inline_keyboard: ib.getInlineLink()
+                                    }
+                                })
                             })
                             bot.editMessageText(`➡️ <b>Сделка прошла успешно!</b> Списание средств со счета <b>-${type.Price}$</b>. Ваш баланс: <b>${user.Balance - type.Price}$</b>.\n Хорошего дня!`, {
                                 chat_id: chatId,
@@ -1031,7 +1188,7 @@ function sendState(chatId, messageId, query, data, temp, query) {
         })
     ]).then(([states, type]) => {
         if (states.length) {
-            getInlineListStates(chatId, messageId, states, type.Name, temp + countState,type.Price)
+            getInlineListStates(chatId, messageId, states, type.Name, temp + countState, type.Price)
         } else {
             bot.answerCallbackQuery({
                 callback_query_id: query.id,
@@ -1081,7 +1238,7 @@ function velcomeText(msg) {
                     parse_mode: 'html',
                 })
             })
-        }else{
+        } else {
             User.updateMany({
                 telegramId: chatId
             }, {
@@ -1130,20 +1287,20 @@ function sendCity(chatId, messageId, query, data, temp) {
     Promise.all([
         City.find({
             State: spli[0],
-            Type:spli[1]
+            Type: spli[1]
         }).skip(temp).limit(countState).sort({
             Name: 1
         }),
         State.findOne({
             Name: spli[0],
-            Type:spli[1]
+            Type: spli[1]
         }),
     ]).then(([citys, state]) => {
         if (citys.length) {
             Type.findOne({
                 Name: spli[1]
             }).then(type => {
-                getInlineListCitys(chatId, messageId, citys, type.Name, state.Name, temp + countState, query,type.Price)
+                getInlineListCitys(chatId, messageId, citys, type.Name, state.Name, temp + countState, query, type.Price)
             })
         } else {
             bot.answerCallbackQuery({
@@ -1156,7 +1313,7 @@ function sendCity(chatId, messageId, query, data, temp) {
 
 }
 
-async function getInlineListCitys(chatId, messageId, citys, typeName, stateName, last, query,pricetype) {
+async function getInlineListCitys(chatId, messageId, citys, typeName, stateName, last, query, pricetype) {
     const cityNames = citys.map(citys => citys.Name);
     const typeNames = citys.map(citys => citys.Type);
     const stateNames = citys.map(citys => citys.State);
@@ -1164,9 +1321,11 @@ async function getInlineListCitys(chatId, messageId, citys, typeName, stateName,
     const allProducts = await Product.find({
         City: {
             $in: cityNames
-        },State: {
+        },
+        State: {
             $in: stateNames
-        },Type: {
+        },
+        Type: {
             $in: typeNames
         },
         telegramId: 'false'
@@ -1233,28 +1392,29 @@ async function getInlineListCitys(chatId, messageId, citys, typeName, stateName,
                     })
                 }
             ],
-            
+
         )
         var txt = citys[0].Type === 'Google Voice' ? 'код телефона' : 'Город'
-    request('https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5', function (error, response, body) {
-        if (error) throw new Error(error)
-        if (response.statusCode === 200) {
-            const datas = JSON.parse(body);
-            const resultrur = datas.filter(item => item.ccy === 'RUR')[0];
-            const resultusd = datas.filter(item => item.ccy === 'USD')[0];
+        request('https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5', function(error, response, body) {
+            if (error) throw new Error(error)
+            if (response.statusCode === 200) {
+                const datas = JSON.parse(body);
+                const resultrur = datas.filter(item => item.ccy === 'RUR')[0];
+                const resultusd = datas.filter(item => item.ccy === 'USD')[0];
 
-            var result = Math.ceil(((1*resultusd.sale)*(pricetype/resultrur.sale)))
-        bot.editMessageText(`Ваши данные:\n- <b>Тип:</b> ${typeName}.\n- <b>Штат:</b> ${stateName}.\n- <b>Стоимость:</b> ${pricetype}$ (~${result}₽).\nТеперь выберите, интересующий Вас ${txt}:`, {
-            chat_id: chatId,
-            message_id: messageId,
-            parse_mode: 'html',
-            disable_web_page_preview: true,
-            reply_markup: {
-                inline_keyboard: arr
+                var result = Math.ceil(((1 * resultusd.sale) * (pricetype / resultrur.sale)))
+                bot.editMessageText(`Ваши данные:\n- <b>Тип:</b> ${typeName}.\n- <b>Штат:</b> ${stateName}.\n- <b>Стоимость:</b> ${pricetype}$ (~${result}₽).\nТеперь выберите, интересующий Вас ${txt}:`, {
+                    chat_id: chatId,
+                    message_id: messageId,
+                    parse_mode: 'html',
+                    disable_web_page_preview: true,
+                    reply_markup: {
+                        inline_keyboard: arr
+                    }
+
+                })
             }
-
         })
-    }})
     } else {
         bot.answerCallbackQuery({
             callback_query_id: query.id,
@@ -1269,7 +1429,7 @@ async function getInlineListCitys(chatId, messageId, citys, typeName, stateName,
 
 function sendViewProduct(chatId, messageId, query, data) {
     var spli = data.split('@#')
-        log(spli)
+    log(spli)
     Product.find({
         City: spli[0],
         State: spli[1],
@@ -1284,55 +1444,55 @@ function sendViewProduct(chatId, messageId, query, data) {
             telegramId: 'false'
         }).then(product => {
             if (product) {
-    request('https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5', function (error, response, body) {
-        if (error) throw new Error(error)
-        if (response.statusCode === 200) {
-            const data = JSON.parse(body);
-            const resultrur = data.filter(item => item.ccy === 'RUR')[0];
-            const resultusd = data.filter(item => item.ccy === 'USD')[0];
+                request('https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5', function(error, response, body) {
+                    if (error) throw new Error(error)
+                    if (response.statusCode === 200) {
+                        const data = JSON.parse(body);
+                        const resultrur = data.filter(item => item.ccy === 'RUR')[0];
+                        const resultusd = data.filter(item => item.ccy === 'USD')[0];
 
 
-                Promise.all([
-                    State.findOne({
-                        Name: product.State,
-                        Type: product.Type
-                    }),
-                    City.findOne({
-                        Name: product.City,
-                        Type: product.Type,
-                        State: product.State
-                    }),
-                    Type.findOne({
-                        Name: product.Type
-                    })
-                ]).then(([state, city, type]) => {
+                        Promise.all([
+                            State.findOne({
+                                Name: product.State,
+                                Type: product.Type
+                            }),
+                            City.findOne({
+                                Name: product.City,
+                                Type: product.Type,
+                                State: product.State
+                            }),
+                            Type.findOne({
+                                Name: product.Type
+                            })
+                        ]).then(([state, city, type]) => {
 
-                    var txt = product.Name === 'Google Voice' ? 'Код телефона' : 'Город'
-            var priceRub = Math.ceil(((type.Price*resultusd.sale)*(1/resultrur.sale)))
-
-
-                    bot.editMessageText(`🛍 Вы заполнили необходимые данные!\n___\n- <b>Название:</b>  ${product.Name}.\n- <b>Штат:</b> ${state.Name}.\n- <b>${txt}:</b> ${city.Name}.\n- <b>Доступно:</b> ${products.length}шт.\n\n<i>После покупки, бот мгновенно пришлет вам данные, согласно запросу!</i>`, {
-                        chat_id: chatId,
-                        message_id: messageId,
-                        parse_mode: 'html',
-                        disable_web_page_preview: true,
-                        reply_markup: {
-                            inline_keyboard: ib.getInlinePayProducts(product, type.Price,priceRub)
-                        }
+                            var txt = product.Name === 'Google Voice' ? 'Код телефона' : 'Город'
+                            var priceRub = Math.ceil(((type.Price * resultusd.sale) * (1 / resultrur.sale)))
 
 
-                    }).then(function(resp) {}).catch(function(error) {})
-                })
-            } else {
-                bot.answerCallbackQuery({
-                    callback_query_id: query.id,
-                    show_alert: true,
-                    text: `💤 По Вашему запросу нечего не найдено! Повторите попытку позже. `
+                            bot.editMessageText(`🛍 Вы заполнили необходимые данные!\n___\n- <b>Название:</b>  ${product.Name}.\n- <b>Штат:</b> ${state.Name}.\n- <b>${txt}:</b> ${city.Name}.\n- <b>Доступно:</b> ${products.length}шт.\n\n<i>После покупки, бот мгновенно пришлет вам данные, согласно запросу!</i>`, {
+                                chat_id: chatId,
+                                message_id: messageId,
+                                parse_mode: 'html',
+                                disable_web_page_preview: true,
+                                reply_markup: {
+                                    inline_keyboard: ib.getInlinePayProducts(product, type.Price, priceRub)
+                                }
+
+
+                            }).then(function(resp) {}).catch(function(error) {})
+                        })
+                    } else {
+                        bot.answerCallbackQuery({
+                            callback_query_id: query.id,
+                            show_alert: true,
+                            text: `💤 По Вашему запросу нечего не найдено! Повторите попытку позже. `
+                        })
+                    }
                 })
             }
         })
-    }}
-    )
     })
 }
 
@@ -1362,7 +1522,8 @@ async function getInlineListStates(chatId, messageId, states, typeName, last, ty
     const allProducts = await Product.find({
         State: {
             $in: statesNames
-        },Type: {
+        },
+        Type: {
             $in: statesTypes
         },
         telegramId: 'false'
@@ -1427,26 +1588,27 @@ async function getInlineListStates(chatId, messageId, states, typeName, last, ty
                 }
             ],
         )
-    request('https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5', function (error, response, body) {
-        if (error) throw new Error(error)
-        if (response.statusCode === 200) {
-            const data = JSON.parse(body);
-            const resultrur = data.filter(item => item.ccy === 'RUR')[0];
-            const resultusd = data.filter(item => item.ccy === 'USD')[0];
+        request('https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5', function(error, response, body) {
+            if (error) throw new Error(error)
+            if (response.statusCode === 200) {
+                const data = JSON.parse(body);
+                const resultrur = data.filter(item => item.ccy === 'RUR')[0];
+                const resultusd = data.filter(item => item.ccy === 'USD')[0];
 
-            var result = Math.ceil(((1*resultusd.sale)*(typePrice/resultrur.sale)))
-        bot.editMessageText(`Ваши данные:\n- <b>Тип:</b> ${typeName}.\n- <b>Стоимость:</b> ${typePrice}$ (~${result}₽)\nТеперь выберите, интересующий Вас штат:`, {
-            chat_id: chatId,
-            message_id: messageId,
-            parse_mode: 'html',
-            disable_web_page_preview: true,
-            reply_markup: {
-                inline_keyboard: arr
+                var result = Math.ceil(((1 * resultusd.sale) * (typePrice / resultrur.sale)))
+                bot.editMessageText(`Ваши данные:\n- <b>Тип:</b> ${typeName}.\n- <b>Стоимость:</b> ${typePrice}$ (~${result}₽)\nТеперь выберите, интересующий Вас штат:`, {
+                    chat_id: chatId,
+                    message_id: messageId,
+                    parse_mode: 'html',
+                    disable_web_page_preview: true,
+                    reply_markup: {
+                        inline_keyboard: arr
+                    }
+
+                }).then(function(resp) {}).catch(function(error) {})
             }
-
-        }).then(function(resp) {}).catch(function(error) {})
-    }})
-    } 
+        })
+    }
 
 }
 
@@ -1456,7 +1618,7 @@ async function getInlineListStates(chatId, messageId, states, typeName, last, ty
 async function getInlineListType(chatId, messageId, types, edit) {
     var arr = []
     const typesNames = types.map(types => types.Name);
-    var result 
+    var result
 
     const allProducts = await Product.find({
         Type: {
@@ -1464,7 +1626,7 @@ async function getInlineListType(chatId, messageId, types, edit) {
         },
         telegramId: 'false'
     });
-    request('https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5', function (error, response, body) {
+    request('https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5', function(error, response, body) {
         if (error) throw new Error(error)
         if (response.statusCode === 200) {
             const data = JSON.parse(body);
@@ -1473,58 +1635,58 @@ async function getInlineListType(chatId, messageId, types, edit) {
 
 
 
-    types.forEach(c => {
+            types.forEach(c => {
 
-        const count =
-            allProducts.filter(product => product.Type === c.Name)
-            .length ||
-            0;
+                const count =
+                    allProducts.filter(product => product.Type === c.Name)
+                    .length ||
+                    0;
 
-            result = Math.ceil(((c.Price*resultusd.sale)*(1/resultrur.sale)))
+                result = Math.ceil(((c.Price * resultusd.sale) * (1 / resultrur.sale)))
 
 
 
-        if (count > 0) {
+                if (count > 0) {
 
-            arr.push(
-                [{
-                    text: `${c.Name} - ${c.Price}$ (~${result}₽) | ${count} »`,
-                    callback_data: JSON.stringify({
-                        type: 'SelType',
-                        data: c.Name
-                    })
-                }],
-            )
-        } else {
-            return 0
-        }
-    })
+                    arr.push(
+                        [{
+                            text: `${c.Name} - ${c.Price}$ (~${result}₽) | ${count} »`,
+                            callback_data: JSON.stringify({
+                                type: 'SelType',
+                                data: c.Name
+                            })
+                        }],
+                    )
+                } else {
+                    return 0
+                }
+            })
 
-    if (arr.length) {
-        var text = '🛒 <b>Вы вошли в магазин.</b>\n- Выберите тип данных, который Вас интересует:'
-    } else {
-        var text = 'Нечего не найдено по вашему запросу. Повторите попытку позже!'
-    }
-
-    if (edit) {
-        bot.editMessageText(text, {
-            chat_id: chatId,
-            message_id: messageId,
-            parse_mode: 'html',
-            reply_markup: {
-                inline_keyboard: arr
+            if (arr.length) {
+                var text = '🛒 <b>Вы вошли в магазин.</b>\n- Выберите тип данных, который Вас интересует:'
+            } else {
+                var text = 'Нечего не найдено по вашему запросу. Повторите попытку позже!'
             }
 
-        }).then(function(resp) {}).catch(function(error) {})
-    } else {
-        bot.sendMessage(chatId, text, {
-            parse_mode: 'html',
-            reply_markup: {
-                inline_keyboard: arr
+            if (edit) {
+                bot.editMessageText(text, {
+                    chat_id: chatId,
+                    message_id: messageId,
+                    parse_mode: 'html',
+                    reply_markup: {
+                        inline_keyboard: arr
+                    }
 
+                }).then(function(resp) {}).catch(function(error) {})
+            } else {
+                bot.sendMessage(chatId, text, {
+                    parse_mode: 'html',
+                    reply_markup: {
+                        inline_keyboard: arr
+
+                    }
+                })
             }
-        })
-    }
 
         }
 
