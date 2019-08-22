@@ -635,7 +635,8 @@ bot.on('message', msg => {
 
                                 arrStateNew.forEach(i => {
                                     State.find({
-                                        Name: i
+                                        Name: i,
+                                        Type:typevar
                                     }).then(state => {
                                         if (!state.length) {
                                             new State({
@@ -661,6 +662,7 @@ bot.on('message', msg => {
                                     var is = i.split(',')
                                     City.find({
                                         State: is[0],
+                                        Type:typevar,
                                         Name: is[1]
                                     }).then(city => {
                                         if (!city.length) {
