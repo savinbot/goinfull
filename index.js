@@ -86,7 +86,7 @@ const publictime = new CronJob('*/1 * * * *', () => {
                                 }, function(err, res) {})
 
                                 AdminArray.forEach(a => {
-                                    bot.sendMessage(a, `<a href="tg://user?id=${c.telegramId}">${c.Name}</a> пополнил свой баланс на ${summ.toFixed(2)}$.`, {
+                                    bot.sendMessage(a, `<a href="tg://user?id=${c.telegramId}">${c.Name}</a> пополнил свой баланс на ${summ.toFixed(2)}$ через систему Coinpayments.`, {
                                         parse_mode: 'html',
                                     })
                                 })
@@ -1028,7 +1028,6 @@ bot.on('callback_query', query => {
                                 }).then(function(resp) {}).catch(function(error) {})
                             })
                         } else {
-
                             var qiwiurl = `https://w.qiwi.com/payment/form/99?currency=643&amountFraction=0&extra[%27account%27]=${config.QIWIPORTMONEY}&extra[%27comment%27]=${tranz_info._id}`
                             bot.editMessageText(text, {
                                 chat_id: chatId,
@@ -1047,6 +1046,27 @@ bot.on('callback_query', query => {
             break
         case 'bSC':
             sendCity(chatId, messageId, query, data, 0)
+            break
+        case 'ClearMyPurchases':
+            bot.deleteMessage(chatId, messageId)
+            Product.findOne({id:data}).then(product=>{
+                if (product) {
+                    Product.deleteOne(({
+                        id: data
+                    }), function(err, result) {})
+                    bot.answerCallbackQuery({
+                        callback_query_id: query.id,
+                        show_alert: true,
+                        text: `💤 Данные товар был удален.\n${product.Description}`
+                    })
+                }else{
+                    bot.answerCallbackQuery({
+                        callback_query_id: query.id,
+                        show_alert: true,
+                        text: `💤 Данные не найдены`
+                    })
+                }
+            })
             break
         case 'backSelState':
             sendState(chatId, messageId, query, data, 0, query)
@@ -1102,11 +1122,8 @@ bot.on('callback_query', query => {
                     }).then(type => {
                         if (user.Balance >= type.Price) {
                             AdminArray.forEach(c => {
-                                bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${query.from.first_name}</a> совершил покупку товара ${product.Name}.`, {
+                                bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${query.from.first_name}</a> совершил покупку товара ${product.Name} за <b>${type.Price}$</b>.\n<b>Остаток на балансе:</b> ${user.Balance - type.Price}$`, {
                                     parse_mode: 'html',
-                                    reply_markup: {
-                                        inline_keyboard: ib.getInlineLink()
-                                    }
                                 })
                             })
                             bot.editMessageText(`➡️ <b>Сделка прошла успешно!</b> Списание средств со счета <b>-${type.Price}$</b>. Ваш баланс: <b>${user.Balance - type.Price}$</b>.\n Хорошего дня!`, {
@@ -1510,6 +1527,9 @@ function sendMyPurchases(chatId, products) {
             if (type) {
                 bot.sendMessage(chatId, `💎 <b>Название:</b> ${type.Name}.\n📝 <b>Данные:</b> ${c.Description}.`, {
                     parse_mode: 'html',
+                                reply_markup: {
+                                    inline_keyboard: ib.getInlineClearMyPurchases(c.id)
+                                }
                 })
             }
         })
