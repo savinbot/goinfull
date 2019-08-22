@@ -20,6 +20,17 @@ module.exports = {
             }],
         ]
     },
+    getInlineClearMyPurchases(Id) {
+        return [
+            [{
+                text: 'Удалить (безвозвратно) »',
+                callback_data: JSON.stringify({
+                    type: 'ClearMyPurchases',
+                    data:Id
+                })
+            }]
+        ]
+    },
     getInlineListForPost(messageId) {
         return [
             [{
