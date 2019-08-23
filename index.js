@@ -171,7 +171,7 @@ const publictime = new CronJob('*/1 * * * *', () => {
         }
     })
 })
-// publictime.start();
+publictime.start();
 // 
 const publictimeqiwi = new CronJob('*/1 * * * *', () => {
     Wallet.getOperationHistory({
@@ -247,7 +247,7 @@ const publictimeqiwi = new CronJob('*/1 * * * *', () => {
     })
 
 })
-// publictimeqiwi.start();
+publictimeqiwi.start();
 
 bot.onText(/\/start (.+)/, (msg, [source, match]) => {
     velcomeText(msg)
