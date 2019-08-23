@@ -15,7 +15,7 @@ const keyboard = require('./src/keyboard')
 const mongoose = require('mongoose')
 const CronJob = require('cron').CronJob
 
-const countState = 10
+const countState = 20
 require('./models/user.model')
 require('./models/type.model')
 require('./models/state.model')
@@ -39,6 +39,7 @@ const AdminArray = [adminChatIdVlad, adminChatIdAndrey, adminChatIdFullaInfo]
 
 var Qiwi = require('node-qiwi-api').Qiwi;
 var Wallet = new Qiwi(config.QIWITOKEN);
+
 
 
 mongoose.Promise = global.Promise
@@ -170,7 +171,7 @@ const publictime = new CronJob('*/1 * * * *', () => {
         }
     })
 })
-publictime.start();
+// publictime.start();
 // 
 const publictimeqiwi = new CronJob('*/1 * * * *', () => {
     Wallet.getOperationHistory({
@@ -246,7 +247,7 @@ const publictimeqiwi = new CronJob('*/1 * * * *', () => {
     })
 
 })
-publictimeqiwi.start();
+// publictimeqiwi.start();
 
 bot.onText(/\/start (.+)/, (msg, [source, match]) => {
     velcomeText(msg)
@@ -1350,11 +1351,11 @@ async function getInlineListCitys(chatId, messageId, citys, typeName, stateName,
             $in: stateNames[0]
         },
         Type: {
-            $in: typeNames[1]
+            $in: typeNames[0]
         },
         telegramId: 'false'
     });
-        log(allProducts)
+        log(typeNames)
 
     var arr = []
     var i = 0
@@ -1637,7 +1638,6 @@ async function getInlineListStates(chatId, messageId, states, typeName, last, ty
             }
         })
     }
-
 }
 
 
@@ -1719,6 +1719,5 @@ async function getInlineListType(chatId, messageId, types, edit) {
         }
 
     })
-
 
 }
