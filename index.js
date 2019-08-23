@@ -946,19 +946,11 @@ bot.on('callback_query', query => {
         case 'deleteMessage':
             bot.deleteMessage(chatId, messageId)
             break
-
         case 'SelType':
             sendState(chatId, messageId, query, data, 0, query)
             break
         case 'nextState':
             sendState(chatId, messageId, query, data, temp, query)
-            break
-        case 'nextCity':
-            sendCity(chatId, messageId, query, data, temp)
-            break
-        case 'backCity':
-            var lst = ((temp - countState * 2) < 0) ? 10000 : temp - countState * 2
-            sendCity(chatId, messageId, query, data, lst)
             break
         case 'backState':
             var lst = ((temp - countState * 2) < 0) ? 10000 : temp - countState * 2
@@ -1101,6 +1093,13 @@ bot.on('callback_query', query => {
 
     }
     switch (type.slice(0, 3)) {
+        case 'blC':
+            var lst = ((temp - countState * 2) < 0) ? 10000 : temp - countState * 2
+            sendCity(chatId, messageId, query, type.slice(3),lst)
+        break
+        case 'nlC':
+            sendCity(chatId, messageId, query, type.slice(3), temp)
+            break
         case 'SCi':
             sendViewProduct(chatId, messageId, query, type.slice(3))
             break
@@ -1299,15 +1298,10 @@ function selType(chatId, edit, messageId) {
             })
         }
     })
-
-
-
-
 }
 
 function sendCity(chatId, messageId, query, data, temp) {
     var spli = data.split('@#')
-
     Promise.all([
         City.find({
             State: spli[0],
@@ -1355,7 +1349,6 @@ async function getInlineListCitys(chatId, messageId, citys, typeName, stateName,
         },
         telegramId: 'false'
     });
-        log(typeNames)
 
     var arr = []
     var i = 0
@@ -1404,16 +1397,14 @@ async function getInlineListCitys(chatId, messageId, citys, typeName, stateName,
                 }, {
                     text: `«`,
                     callback_data: JSON.stringify({
-                        type: 'backCity',
-                        data: citys[0].State,
+                        type: `blC${citys[0].State}@#${citys[0].Type}`,
                         temp: last,
                     })
                 },
                 {
                     text: `»`,
                     callback_data: JSON.stringify({
-                        type: 'nextCity',
-                        data: citys[0].State,
+                        type: `nlC${citys[0].State}@#${citys[0].Type}`,
                         temp: last,
                     })
                 }
@@ -1455,7 +1446,6 @@ async function getInlineListCitys(chatId, messageId, citys, typeName, stateName,
 
 function sendViewProduct(chatId, messageId, query, data) {
     var spli = data.split('@#')
-    log(spli)
     Product.find({
         City: spli[0],
         State: spli[1],
@@ -1624,7 +1614,6 @@ async function getInlineListStates(chatId, messageId, states, typeName, last, ty
                 const resultusd = data.filter(item => item.ccy === 'USD')[0];
 
                 var result = Math.ceil(((1 * resultusd.sale) * (typePrice / resultrur.sale)))
-        log(arr)
                 bot.editMessageText(`Ваши данные:\n- <b>Тип:</b> ${typeName}.\n- <b>Стоимость:</b> ${typePrice}$ (~${result}₽)\nТеперь выберите, интересующий Вас штат:`, {
                     chat_id: chatId,
                     message_id: messageId,
