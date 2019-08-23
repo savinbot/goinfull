@@ -335,7 +335,7 @@ bot.onText(/\/newpricefullcs600/, msg => {
     var chatId = msg.chat.id
     AdminArray.forEach(c => {
         if (c === chatId) {
-            bot.sendMessage(chatId, 'Напишите новую цену, для товаров типа Full Info + SSN + DOB + CS(600-700):', {
+            bot.sendMessage(chatId, 'Напишите новую цену, для товаров типа Full Info + CS(600-700):', {
                 parse_mode: 'html',
                 reply_markup: {
                     remove_keyboard: true,
@@ -346,7 +346,7 @@ bot.onText(/\/newpricefullcs600/, msg => {
             }, {
                 $set: {
                     Way: 'editPrice',
-                    TempData: 'Full Info + SSN + DOB + CS(600-700)'
+                    TempData: 'Full Info + CS(600-700)'
 
                 }
             }, function(err, res) {})
@@ -359,7 +359,7 @@ bot.onText(/\/newpricefullcs700/, msg => {
     var chatId = msg.chat.id
     AdminArray.forEach(c => {
         if (c === chatId) {
-            bot.sendMessage(chatId, 'Напишите новую цену, для товаров типа Full Info + SSN + DOB + CS(700-800):', {
+            bot.sendMessage(chatId, 'Напишите новую цену, для товаров типа Full Info + CS(700-800):', {
                 parse_mode: 'html',
                 reply_markup: {
                     remove_keyboard: true,
@@ -370,7 +370,7 @@ bot.onText(/\/newpricefullcs700/, msg => {
             }, {
                 $set: {
                     Way: 'editPrice',
-                    TempData: 'Full Info + SSN + DOB + CS(700-800)'
+                    TempData: 'Full Info + CS(700-800)'
 
                 }
             }, function(err, res) {})
@@ -383,7 +383,7 @@ bot.onText(/\/newpricefullcs800/, msg => {
     var chatId = msg.chat.id
     AdminArray.forEach(c => {
         if (c === chatId) {
-            bot.sendMessage(chatId, 'Напишите новую цену, для товаров типа Full Info + SSN + DOB + CS(800+):', {
+            bot.sendMessage(chatId, 'Напишите новую цену, для товаров типа Full Info + CS(800+):', {
                 parse_mode: 'html',
                 reply_markup: {
                     remove_keyboard: true,
@@ -394,7 +394,7 @@ bot.onText(/\/newpricefullcs800/, msg => {
             }, {
                 $set: {
                     Way: 'editPrice',
-                    TempData: 'Full Info + SSN + DOB + CS(800+)'
+                    TempData: 'Full Info + CS(800+)'
 
                 }
             }, function(err, res) {})
@@ -430,7 +430,7 @@ bot.onText(/\/newfullcs600/, msg => {
     var chatId = msg.chat.id
     AdminArray.forEach(c => {
         if (c === chatId) {
-            bot.sendMessage(chatId, 'Для добавление товаров типа Full Info + SSN + DOB + CS(600-700), пришлите боту документ, формата .xlsx', {
+            bot.sendMessage(chatId, 'Для добавление товаров типа Full Info + CS(600-700), пришлите боту документ, формата .xlsx', {
                 parse_mode: 'html',
             })
             User.updateMany({
@@ -438,7 +438,7 @@ bot.onText(/\/newfullcs600/, msg => {
             }, {
                 $set: {
                     Way: 'addDocument',
-                    TempData: 'Full Info + SSN + DOB + CS(600-700)'
+                    TempData: 'Full Info + CS(600-700)'
 
                 }
             }, function(err, res) {})
@@ -451,7 +451,7 @@ bot.onText(/\/newfullcs700/, msg => {
     var chatId = msg.chat.id
     AdminArray.forEach(c => {
         if (c === chatId) {
-            bot.sendMessage(chatId, 'Для добавление товаров типа Full Info + SSN + DOB + CS(700-800), пришлите боту документ, формата .xlsx', {
+            bot.sendMessage(chatId, 'Для добавление товаров типа Full Info + CS(700-800), пришлите боту документ, формата .xlsx', {
                 parse_mode: 'html',
             })
             User.updateMany({
@@ -459,7 +459,7 @@ bot.onText(/\/newfullcs700/, msg => {
             }, {
                 $set: {
                     Way: 'addDocument',
-                    TempData: 'Full Info + SSN + DOB + CS(700-800)'
+                    TempData: 'Full Info + CS(700-800)'
 
                 }
             }, function(err, res) {})
@@ -472,7 +472,7 @@ bot.onText(/\/newfullcs800/, msg => {
     var chatId = msg.chat.id
     AdminArray.forEach(c => {
         if (c === chatId) {
-            bot.sendMessage(chatId, 'Для добавление товаров типа Full Info + SSN + DOB + CS(800+), пришлите боту документ, формата .xlsx', {
+            bot.sendMessage(chatId, 'Для добавление товаров типа Full Info + CS(800+), пришлите боту документ, формата .xlsx', {
                 parse_mode: 'html',
             })
             User.updateMany({
@@ -480,7 +480,7 @@ bot.onText(/\/newfullcs800/, msg => {
             }, {
                 $set: {
                     Way: 'addDocument',
-                    TempData: 'Full Info + SSN + DOB + CS(800+)'
+                    TempData: 'Full Info + CS(800+)'
 
                 }
             }, function(err, res) {})
@@ -536,7 +536,7 @@ bot.onText(/\/newgooglevoice/, msg => {
 bot.on('message', msg => {
     var chatId = msg.chat.id
     // new Type({
-    //     Name: 'Full Info + SSN + DOB + CS(800+)',
+    //     Name: 'Full Info + CS(800+)',
     //     Sort: 'd',
     //     Price: 10,
     // }).save().then(newtranzinfo => {
@@ -583,17 +583,17 @@ bot.on('message', msg => {
                                                 var cityvar = `${obj2[i][2]}`
                                                 var desc = `${obj2[i][0]}|${obj2[i][1]}|${obj2[i][2]}|${obj2[i][3]}|${obj2[i][4]}|${obj2[i][5]}|${obj2[i][6]}-${obj2[i][7]}-${obj2[i][8]}`
                                                 break
-                                            case 'Full Info + SSN + DOB + CS(600-700)':
+                                            case 'Full Info + CS(600-700)':
                                                 var statevar = `${obj2[i][3]}`
                                                 var cityvar = `${obj2[i][2]}`
                                                 var desc = `${obj2[i][0]}|${obj2[i][1]}|${obj2[i][2]}|${obj2[i][3]}|${obj2[i][4]}|${obj2[i][5]}|${obj2[i][6]}-${obj2[i][7]}-${obj2[i][8]}|${obj2[i][9]}`
                                                 break
-                                            case 'Full Info + SSN + DOB + CS(700-800)':
+                                            case 'Full Info + CS(700-800)':
                                                 var statevar = `${obj2[i][3]}`
                                                 var cityvar = `${obj2[i][2]}`
                                                 var desc = `${obj2[i][0]}|${obj2[i][1]}|${obj2[i][2]}|${obj2[i][3]}|${obj2[i][4]}|${obj2[i][5]}|${obj2[i][6]}-${obj2[i][7]}-${obj2[i][8]}|${obj2[i][9]}`
                                                 break
-                                            case 'Full Info + SSN + DOB + CS(800+)':
+                                            case 'Full Info + CS(800+)':
                                                 var statevar = `${obj2[i][3]}`
                                                 var cityvar = `${obj2[i][2]}`
                                                 var desc = `${obj2[i][0]}|${obj2[i][1]}|${obj2[i][2]}|${obj2[i][3]}|${obj2[i][4]}|${obj2[i][5]}|${obj2[i][6]}-${obj2[i][7]}-${obj2[i][8]}|${obj2[i][9]}`
@@ -1104,7 +1104,7 @@ bot.on('callback_query', query => {
             sendViewProduct(chatId, messageId, query, type.slice(3))
             break
         case 'SSt':
-            sendCity(chatId, messageId, query, type.slice(3), 0)
+            sendCity(chatId, messageId, query, type.slice(3),0)
             break
         case 'pPr':
             var spli = type.slice(3).split('@#')
@@ -1209,6 +1209,7 @@ function sendState(chatId, messageId, query, data, temp, query) {
             Name: data
         })
     ]).then(([states, type]) => {
+
         if (states.length) {
             getInlineListStates(chatId, messageId, states, type.Name, temp + countState, type.Price)
         } else {
@@ -1304,8 +1305,8 @@ function selType(chatId, edit, messageId) {
 }
 
 function sendCity(chatId, messageId, query, data, temp) {
-
     var spli = data.split('@#')
+
     Promise.all([
         City.find({
             State: spli[0],
@@ -1340,19 +1341,20 @@ async function getInlineListCitys(chatId, messageId, citys, typeName, stateName,
     const typeNames = citys.map(citys => citys.Type);
     const stateNames = citys.map(citys => citys.State);
 
+
     const allProducts = await Product.find({
         City: {
             $in: cityNames
         },
         State: {
-            $in: stateNames
+            $in: stateNames[0]
         },
         Type: {
-            $in: typeNames
+            $in: typeNames[1]
         },
         telegramId: 'false'
     });
-
+        log(allProducts)
 
     var arr = []
     var i = 0
@@ -1363,6 +1365,7 @@ async function getInlineListCitys(chatId, messageId, citys, typeName, stateName,
             allProducts.filter(product => product.City === c.Name)
             .length ||
             0;
+
         if (count > 0) {
             if (ic % 2 === 0) {
                 arr.push(
@@ -1549,11 +1552,10 @@ async function getInlineListStates(chatId, messageId, states, typeName, last, ty
             $in: statesNames
         },
         Type: {
-            $in: statesTypes
+            $in: statesTypes[0]
         },
         telegramId: 'false'
     });
-
     var arr = []
     var i = 0
     var ic = 0
@@ -1621,6 +1623,7 @@ async function getInlineListStates(chatId, messageId, states, typeName, last, ty
                 const resultusd = data.filter(item => item.ccy === 'USD')[0];
 
                 var result = Math.ceil(((1 * resultusd.sale) * (typePrice / resultrur.sale)))
+        log(arr)
                 bot.editMessageText(`Ваши данные:\n- <b>Тип:</b> ${typeName}.\n- <b>Стоимость:</b> ${typePrice}$ (~${result}₽)\nТеперь выберите, интересующий Вас штат:`, {
                     chat_id: chatId,
                     message_id: messageId,
@@ -1630,7 +1633,7 @@ async function getInlineListStates(chatId, messageId, states, typeName, last, ty
                         inline_keyboard: arr
                     }
 
-                }).then(function(resp) {}).catch(function(error) {})
+                })
             }
         })
     }
