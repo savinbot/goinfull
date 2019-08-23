@@ -330,7 +330,8 @@ bot.onText(/\/newpricefullinfo/, msg => {
     })
 })
 
-bot.onText(/\/newpricefullinfocs600/, msg => {
+bot.onText(/\/newpricefullcs600/, msg => {
+    log(msg.text)
     var chatId = msg.chat.id
     AdminArray.forEach(c => {
         if (c === chatId) {
@@ -354,7 +355,7 @@ bot.onText(/\/newpricefullinfocs600/, msg => {
     })
 })
 
-bot.onText(/\/newpricefullinfocs700/, msg => {
+bot.onText(/\/newpricefullcs700/, msg => {
     var chatId = msg.chat.id
     AdminArray.forEach(c => {
         if (c === chatId) {
@@ -378,7 +379,7 @@ bot.onText(/\/newpricefullinfocs700/, msg => {
     })
 })
 
-bot.onText(/\/newpricefullinfocs800/, msg => {
+bot.onText(/\/newpricefullcs800/, msg => {
     var chatId = msg.chat.id
     AdminArray.forEach(c => {
         if (c === chatId) {
@@ -425,7 +426,7 @@ bot.onText(/\/newpricegooglevoice/, msg => {
     })
 })
 
-bot.onText(/\/newfullinfocs600/, msg => {
+bot.onText(/\/newfullcs600/, msg => {
     var chatId = msg.chat.id
     AdminArray.forEach(c => {
         if (c === chatId) {
@@ -446,7 +447,7 @@ bot.onText(/\/newfullinfocs600/, msg => {
     })
 })
 
-bot.onText(/\/newfullinfocs700/, msg => {
+bot.onText(/\/newfullcs700/, msg => {
     var chatId = msg.chat.id
     AdminArray.forEach(c => {
         if (c === chatId) {
@@ -467,7 +468,7 @@ bot.onText(/\/newfullinfocs700/, msg => {
     })
 })
 
-bot.onText(/\/newfullinfocs800/, msg => {
+bot.onText(/\/newfullcs800/, msg => {
     var chatId = msg.chat.id
     AdminArray.forEach(c => {
         if (c === chatId) {
@@ -552,7 +553,9 @@ bot.on('message', msg => {
     User.findOne({
         telegramId: chatId,
     }).then(user => {
-        if (user && msg.text !== '/stop' && msg.text !== '/start' && msg.text !== '/newgooglevoice' && msg.text !== '/newfullinfo' && msg.text !== '/pricefullinfo' && msg.text !== '/pricegooglevoice') {
+        if (user && msg.text !== '/stop' && msg.text !== '/start' && msg.text !== '/newgooglevoice' && msg.text !== '/newfullinfo' && msg.text !== '/pricefullinfo' 
+            && msg.text !== '/pricegooglevoice' && msg.text !== '/newfullcs600'&& msg.text !== '/newfullcs700'&& msg.text !== '/newfullcs800'
+            && msg.text !== '/newpricefullcs800'&& msg.text !== '/newpricefullcs700'&& msg.text !== '/newpricefullcs600') {
             switch (user.Way) {
                 case 'addDocument':
                     if (msg.document) {
