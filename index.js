@@ -573,11 +573,14 @@ bot.on('message', msg => {
                                     for (var i = obj2.length - 1; i >= 1; i--) {
                                         switch (user.TempData) {
                                             case 'Google Voice':
-                                                var statevar = `${obj2[i][3]}`
-                                                var re = `${obj2[i][4]}`
+                                                // var statevar = `${obj2[i][3]}`
+                                                // var re = `${obj2[i][4]}`
+                                                var statevar = `${obj2[i][4]}`
+                                                var re = `${obj2[i][5]}`
                                                 re = re.split(')')
                                                 var cityvar = `${re[0]})`
-                                                var desc = `${obj2[i][0]}|pass:${obj2[i][1]}|security answer:${obj2[i][2]}|${obj2[i][3]}|${obj2[i][4]}`
+                                                // var desc = `${obj2[i][0]}|pass:${obj2[i][1]}|security answer:${obj2[i][2]}|${obj2[i][3]}|${obj2[i][4]}`
+                                                var desc = `${obj2[i][0]}|pass:${obj2[i][1]}|reserve mail:${obj2[i][2]}|pass:${obj2[i][3]}|${obj2[i][4]}|${obj2[i][5]}`
                                                 break
                                             case 'Full Info + SSN + DOB':
                                                 var statevar = `${obj2[i][3]}`
@@ -1125,7 +1128,7 @@ bot.on('callback_query', query => {
                     }).then(type => {
                         if (user.Balance >= type.Price) {
                             AdminArray.forEach(c => {
-                                bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${query.from.first_name}</a> совершил покупку товара ${product.Name} за <b>${type.Price}$</b>.\n<b>Остаток на балансе:</b> ${user.Balance - type.Price}$`, {
+                                bot.sendMessage(c, `<a href="tg://user?id=${chatId}">${query.from.first_name}</a> совершил покупку товара ${product.Name} за <b>${type.Price}$</b>.\n<b>Остаток на балансе:</b> ${(user.Balance - type.Price).toFixed(2)}$`, {
                                     parse_mode: 'html',
                                 })
                             })
@@ -1152,7 +1155,7 @@ bot.on('callback_query', query => {
                                 telegramId: chatId
                             }, {
                                 $set: {
-                                    Balance: user.Balance - type.Price
+                                    Balance: (user.Balance - type.Price).toFixed(2)
                                 }
                             }, function(err, res) {})
                         } else {
@@ -1209,6 +1212,7 @@ function sendState(chatId, messageId, query, data, temp, query) {
             Name: data
         })
     ]).then(([states, type]) => {
+                log(states)
 
         if (states.length) {
             getInlineListStates(chatId, messageId, states, type.Name, temp + countState, type.Price)
@@ -1318,6 +1322,7 @@ function sendCity(chatId, messageId, query, data, temp) {
             Type.findOne({
                 Name: spli[1]
             }).then(type => {
+                log(citys)
                 getInlineListCitys(chatId, messageId, citys, type.Name, state.Name, temp + countState, query, type.Price)
             })
         } else {
