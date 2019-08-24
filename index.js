@@ -1132,7 +1132,7 @@ bot.on('callback_query', query => {
                                     parse_mode: 'html',
                                 })
                             })
-                            bot.editMessageText(`➡️ <b>Сделка прошла успешно!</b> Списание средств со счета <b>-${type.Price}$</b>. Ваш баланс: <b>${user.Balance - type.Price}$</b>.\n Хорошего дня!`, {
+                            bot.editMessageText(`➡️ <b>Сделка прошла успешно!</b> Списание средств со счета <b>-${type.Price}$</b>. Ваш баланс: <b>${(user.Balance - type.Price).toFixed(2)}$</b>.\n Хорошего дня!`, {
                                 chat_id: chatId,
                                 message_id: messageId,
                                 parse_mode: 'html',
@@ -1714,4 +1714,4 @@ async function getInlineListType(chatId, messageId, types, edit) {
 
     })
 
-}
+// }
