@@ -1714,4 +1714,4 @@ async function getInlineListType(chatId, messageId, types, edit) {
 
     })
 
-// }
+}
