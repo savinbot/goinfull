@@ -309,6 +309,8 @@ bot.onText(/\/stop/, msg => {
 
 bot.onText(/\/newpricefullinfo/, msg => {
     var chatId = msg.chat.id
+        log(msg.text)
+
     AdminArray.forEach(c => {
         if (c === chatId) {
             bot.sendMessage(chatId, 'Напишите новую цену, для товаров типа Full Info + SSN + DOB:', {
@@ -429,6 +431,8 @@ bot.onText(/\/newpricegooglevoice/, msg => {
 
 bot.onText(/\/newfullcs600/, msg => {
     var chatId = msg.chat.id
+        log(msg.text)
+
     AdminArray.forEach(c => {
         if (c === chatId) {
             bot.sendMessage(chatId, 'Для добавление товаров типа Full Info + CS(600-700), пришлите боту документ, формата .xlsx', {
@@ -450,6 +454,8 @@ bot.onText(/\/newfullcs600/, msg => {
 
 bot.onText(/\/newfullcs700/, msg => {
     var chatId = msg.chat.id
+        log(msg.text)
+
     AdminArray.forEach(c => {
         if (c === chatId) {
             bot.sendMessage(chatId, 'Для добавление товаров типа Full Info + CS(700-800), пришлите боту документ, формата .xlsx', {
@@ -471,6 +477,8 @@ bot.onText(/\/newfullcs700/, msg => {
 
 bot.onText(/\/newfullcs800/, msg => {
     var chatId = msg.chat.id
+        log(msg.text)
+
     AdminArray.forEach(c => {
         if (c === chatId) {
             bot.sendMessage(chatId, 'Для добавление товаров типа Full Info + CS(800+), пришлите боту документ, формата .xlsx', {
@@ -492,6 +500,8 @@ bot.onText(/\/newfullcs800/, msg => {
 
 bot.onText(/\/newfullinfo/, msg => {
     var chatId = msg.chat.id
+        log(msg.text)
+
     AdminArray.forEach(c => {
         if (c === chatId) {
             bot.sendMessage(chatId, 'Для добавление товаров типа Full Info, пришлите боту документ, формата .xlsx', {
@@ -513,6 +523,8 @@ bot.onText(/\/newfullinfo/, msg => {
 
 bot.onText(/\/newgooglevoice/, msg => {
     var chatId = msg.chat.id
+        log(msg.text)
+
     AdminArray.forEach(c => {
         if (c === chatId) {
             bot.sendMessage(chatId, 'Для добавление товаров типа Google Voice, пришлите боту документ, формата .xlsx', {
@@ -568,8 +580,9 @@ bot.on('message', msg => {
                                 var arrState = []
                                 var arrcity = []
                                 var typevar = user.TempData
-
+                                log(obj2.length )
                                 if (obj2.length < 10000) {
+                                    obj2.length 
                                     for (var i = obj2.length - 1; i >= 1; i--) {
                                         switch (user.TempData) {
                                             case 'Google Voice':
@@ -1212,7 +1225,7 @@ function sendState(chatId, messageId, query, data, temp, query) {
             Name: data
         })
     ]).then(([states, type]) => {
-                log(states)
+               
 
         if (states.length) {
             getInlineListStates(chatId, messageId, states, type.Name, temp + countState, type.Price)
@@ -1322,7 +1335,7 @@ function sendCity(chatId, messageId, query, data, temp) {
             Type.findOne({
                 Name: spli[1]
             }).then(type => {
-                log(citys)
+               
                 getInlineListCitys(chatId, messageId, citys, type.Name, state.Name, temp + countState, query, type.Price)
             })
         } else {
